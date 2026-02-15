@@ -48,12 +48,12 @@ export default function Home() {
           <div className="absolute -top-32 right-10 h-72 w-72 rounded-full bg-[#ffc9a5] opacity-40 blur-3xl" />
           <div className="absolute bottom-10 left-10 h-80 w-80 rounded-full bg-[#ffd9b9] opacity-50 blur-3xl" />
         </div>
-        <header className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 pb-12 pt-16 animate-rise">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-[#a14c15]">
+        <header className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 animate-rise">
+          <div className="flex flex-col items-start gap-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[#a14c15] sm:text-xs sm:tracking-[0.3em]">
               Curated AI promos
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[#5b5045]">
+            <div className="flex w-full flex-wrap items-center gap-3 text-xs text-[#5b5045] sm:w-auto sm:gap-4 sm:text-sm">
               <span className="rounded-full border border-black/10 bg-white/60 px-3 py-1">
                 {promoEntries.length} offers tracked
               </span>
@@ -64,21 +64,21 @@ export default function Home() {
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
-              <h1 className="font-display text-4xl font-semibold tracking-tight text-[#2b211a] sm:text-5xl">
+              <h1 className="font-display text-3xl font-semibold tracking-tight text-[#2b211a] sm:text-4xl lg:text-5xl">
                 ai-promo keeps every AI freebie, credit, and launch perk in one place.
               </h1>
-              <p className="mt-4 text-lg text-[#5b5045]">
+              <p className="mt-4 text-base text-[#5b5045] sm:text-lg">
                 Discover fresh credits, trials, and bundles from top AI tooling partners.
                 Search the catalog or filter by category to plan your next build.
               </p>
             </div>
             <div className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.3)]">
-              <div className="text-sm font-semibold uppercase tracking-[0.2em] text-[#a14c15]">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a14c15] sm:text-sm">
                 Quick actions
               </div>
               <div className="mt-4 flex flex-col gap-3 text-sm text-[#5b5045]">
                 <a
-                  className="rounded-2xl border border-black/10 bg-[#fff4e8] px-4 py-3 font-medium text-[#2b211a] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-lg"
+                  className="w-full rounded-2xl border border-black/10 bg-[#fff4e8] px-4 py-3 text-center font-medium text-[#2b211a] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-lg"
                   href="https://github.com/zainfathoni/ai-promo/issues/new?template=new-promo.yml"
                   target="_blank"
                   rel="noreferrer"
@@ -86,7 +86,7 @@ export default function Home() {
                   Submit a promo entry
                 </a>
                 <a
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 font-medium text-[#2b211a] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] hover:shadow-lg"
+                  className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-center font-medium text-[#2b211a] transition hover:-translate-y-0.5 hover:bg-[#fff4e8] hover:shadow-lg"
                   href="https://github.com/zainfathoni/ai-promo/pulls"
                   target="_blank"
                   rel="noreferrer"
@@ -99,9 +99,9 @@ export default function Home() {
         </header>
       </div>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-16">
+      <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
         <div className="grid gap-4 rounded-3xl border border-black/10 bg-white/80 p-6 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.3)] lg:grid-cols-[1.2fr_0.8fr] animate-rise">
-          <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#a14c15]">
+          <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#a14c15] sm:text-sm sm:tracking-[0.2em]">
             Search promos
             <input
               className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base font-normal text-[#2b211a] shadow-sm outline-none transition focus:border-[#fe7f2d] focus:ring-2 focus:ring-[#fe7f2d]/30"
@@ -110,7 +110,7 @@ export default function Home() {
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#a14c15]">
+          <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#a14c15] sm:text-sm sm:tracking-[0.2em]">
             Category
             <select
               className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base font-normal text-[#2b211a] shadow-sm outline-none transition focus:border-[#fe7f2d] focus:ring-2 focus:ring-[#fe7f2d]/30"
@@ -126,7 +126,7 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="mt-8 flex items-center justify-between text-sm text-[#5b5045]">
+        <div className="mt-8 flex flex-col gap-2 text-xs text-[#5b5045] sm:flex-row sm:items-center sm:justify-between sm:text-sm">
           <span>
             Showing {visibleEntries.length} of {promoEntries.length} promos
           </span>
@@ -135,7 +135,7 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
           {visibleEntries.map((entry) => {
             const isActive = isActivePromo(entry.expiryDate);
 
@@ -146,15 +146,15 @@ export default function Home() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#a14c15]">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[#a14c15] sm:text-xs sm:tracking-[0.3em]">
                       {entry.category}
                     </p>
-                    <h2 className="mt-3 font-display text-2xl font-semibold text-[#2b211a]">
+                    <h2 className="mt-3 font-display text-xl font-semibold text-[#2b211a] sm:text-2xl">
                       {entry.title}
                     </h2>
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] ${
+                    className={`rounded-full px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.15em] ${
                       isActive
                         ? "bg-[#ffe8d4] text-[#a14c15]"
                         : "bg-[#e8e1da] text-[#7a6c60]"
@@ -166,9 +166,9 @@ export default function Home() {
                 <p className="mt-4 text-sm leading-6 text-[#5b5045]">
                   {entry.description}
                 </p>
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a14c15]">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[#a14c15] sm:text-xs sm:tracking-[0.2em]">
                       {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
                     </p>
                     <p className="text-sm font-medium text-[#2b211a]">
@@ -178,7 +178,7 @@ export default function Home() {
                     </p>
                   </div>
                   <a
-                    className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[#2b211a] transition group-hover:-translate-y-0.5 group-hover:border-[#fe7f2d]/60 group-hover:text-[#a14c15]"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[#2b211a] transition group-hover:-translate-y-0.5 group-hover:border-[#fe7f2d]/60 group-hover:text-[#a14c15] sm:w-auto"
                     href={entry.url}
                     target="_blank"
                     rel="noreferrer"
@@ -193,8 +193,8 @@ export default function Home() {
         </div>
 
         {visibleEntries.length === 0 ? (
-          <div className="mt-12 rounded-3xl border border-black/10 bg-white/70 p-10 text-center text-[#5b5045]">
-            <p className="text-lg font-semibold text-[#2b211a]">
+          <div className="mt-12 rounded-3xl border border-black/10 bg-white/70 p-8 text-center text-[#5b5045] sm:p-10">
+            <p className="text-base font-semibold text-[#2b211a] sm:text-lg">
               No promos match your search.
             </p>
             <p className="mt-2">
