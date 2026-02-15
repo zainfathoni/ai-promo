@@ -79,7 +79,7 @@ export default function Home() {
               <div className="mt-4 flex flex-col gap-3 text-sm text-[#5b5045]">
                 <a
                   className="rounded-2xl border border-black/10 bg-[#fff4e8] px-4 py-3 font-medium text-[#2b211a] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-lg"
-                  href="https://github.com/zainfathoni/ai-promo/issues/new"
+                  href="https://github.com/zainfathoni/ai-promo/issues/new?template=new-promo.yml"
                   target="_blank"
                   rel="noreferrer"
                 >
