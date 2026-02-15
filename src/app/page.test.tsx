@@ -19,10 +19,10 @@ describe("Home page", () => {
     const user = userEvent.setup();
     render(<Home />);
 
-    await user.type(screen.getByLabelText("Search promos"), "LangSmith");
+    await user.type(screen.getByLabelText("Search promos"), "Gemini");
 
-    expect(screen.getByText("LangSmith Team Trial")).toBeInTheDocument();
-    expect(screen.queryByText("OpenAI Startup Credits")).not.toBeInTheDocument();
+    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+    expect(screen.queryByText("ElevenLabs Free Plan")).not.toBeInTheDocument();
   });
 
   it("filters by category", async () => {
@@ -31,8 +31,8 @@ describe("Home page", () => {
 
     await user.selectOptions(screen.getByLabelText("Category"), "Design");
 
-    expect(screen.getByText("Figma AI UI Kit")).toBeInTheDocument();
-    expect(screen.queryByText("OpenAI Startup Credits")).not.toBeInTheDocument();
+    expect(screen.getByText("Stability AI API Free Credits")).toBeInTheDocument();
+    expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
   });
 
   it("shows an empty state when no entries match", async () => {

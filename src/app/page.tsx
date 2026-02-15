@@ -13,6 +13,10 @@ const formatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const isActivePromo = (expiryDate: string) => {
+  if (expiryDate === "Ongoing") {
+    return true;
+  }
+
   const expiry = new Date(`${expiryDate}T23:59:59`);
   return expiry.getTime() >= Date.now();
 };
@@ -165,10 +169,12 @@ export default function Home() {
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a14c15]">
-                      Expires
+                      {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
                     </p>
                     <p className="text-sm font-medium text-[#2b211a]">
-                      {formatter.format(new Date(entry.expiryDate))}
+                      {entry.expiryDate === "Ongoing"
+                        ? "Ongoing"
+                        : formatter.format(new Date(entry.expiryDate))}
                     </p>
                   </div>
                   <a

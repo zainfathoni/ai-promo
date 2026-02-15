@@ -12,72 +12,121 @@ export type PromoEntry = {
   description: string;
   category: PromoCategory;
   url: string;
-  expiryDate: string;
+  expiryDate: "Ongoing" | string;
+  source: string;
+  sourceUrl: string;
 };
 
 export const promoEntries: PromoEntry[] = [
   {
-    id: "openai-credits",
-    title: "OpenAI Startup Credits",
-    description: "Apply for up to $2,500 in API credits for new AI startups.",
+    id: "gemini-api-free-tier",
+    title: "Gemini API Free Tier",
+    description:
+      "Free input and output tokens plus Google AI Studio access for Gemini API experimentation.",
     category: "Models",
-    url: "https://openai.com/startups",
-    expiryDate: "2026-04-30",
+    url: "https://ai.google.dev/pricing",
+    expiryDate: "Ongoing",
+    source: "Gemini Developer API pricing",
+    sourceUrl: "https://ai.google.dev/pricing",
   },
   {
-    id: "anthropic-bundled",
-    title: "Claude Pro 2-Month Trial",
-    description: "Two free months of Claude Pro for new teams in beta access.",
-    category: "Productivity",
-    url: "https://www.anthropic.com/claude",
-    expiryDate: "2026-02-28",
+    id: "huggingface-inference-credits",
+    title: "Hugging Face Inference Providers Credits",
+    description:
+      "Free users receive monthly credits to try serverless inference via Hugging Face Inference Providers.",
+    category: "Models",
+    url: "https://huggingface.co/docs/inference-providers/en/pricing",
+    expiryDate: "Ongoing",
+    source: "Hugging Face Inference Providers pricing",
+    sourceUrl: "https://huggingface.co/docs/inference-providers/en/pricing",
   },
   {
-    id: "vercel-ai-deploy",
-    title: "Vercel AI Launch Bundle",
-    description: "$200 Vercel credit and priority onboarding for AI demos.",
+    id: "cloudflare-workers-ai-free",
+    title: "Cloudflare Workers AI Free Allocation",
+    description:
+      "Workers AI includes 10,000 free neurons per day before paid usage applies.",
     category: "Hosting",
-    url: "https://vercel.com/ai",
-    expiryDate: "2026-06-01",
+    url: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+    expiryDate: "Ongoing",
+    source: "Cloudflare Workers AI pricing",
+    sourceUrl: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
   },
   {
-    id: "figma-ai-kit",
-    title: "Figma AI UI Kit",
-    description: "Free AI-focused UI kit with prompt templates and components.",
-    category: "Design",
-    url: "https://www.figma.com/community",
-    expiryDate: "2026-03-10",
-  },
-  {
-    id: "langsmith-trial",
-    title: "LangSmith Team Trial",
-    description: "45-day LangSmith team trial plus evaluation dashboard export.",
-    category: "Developer Tools",
-    url: "https://www.langchain.com/langsmith",
-    expiryDate: "2026-05-15",
-  },
-  {
-    id: "weights-biases",
-    title: "Weights & Biases AI Grant",
-    description: "Early-stage teams get free experiment tracking for 6 months.",
+    id: "pinecone-starter",
+    title: "Pinecone Starter Plan",
+    description:
+      "Start for free with Pinecone's Starter plan for vector database, inference, and assistant usage.",
     category: "Analytics",
-    url: "https://wandb.ai/site",
-    expiryDate: "2025-12-31",
+    url: "https://www.pinecone.io/pricing",
+    expiryDate: "Ongoing",
+    source: "Pinecone pricing",
+    sourceUrl: "https://www.pinecone.io/pricing",
   },
   {
-    id: "replicate-credits",
-    title: "Replicate Credits Pack",
-    description: "$100 of inference credits for shipping your first model demo.",
-    category: "Models",
-    url: "https://replicate.com",
-    expiryDate: "2026-01-20",
+    id: "assemblyai-free-tier",
+    title: "AssemblyAI Free Tier",
+    description:
+      "Free tier includes up to 185 hours of pre-recorded transcription and 333 hours of streaming.",
+    category: "Developer Tools",
+    url: "https://www.assemblyai.com/pricing",
+    expiryDate: "Ongoing",
+    source: "AssemblyAI pricing",
+    sourceUrl: "https://www.assemblyai.com/pricing",
   },
   {
-    id: "notion-ai",
-    title: "Notion AI for Startups",
-    description: "Free Notion AI seats for 3 months plus onboarding templates.",
+    id: "deepgram-free-credits",
+    title: "Deepgram $200 Free Credit",
+    description:
+      "Sign up free to get $200 in Deepgram credits with no credit card required.",
+    category: "Developer Tools",
+    url: "https://deepgram.com/pricing",
+    expiryDate: "Ongoing",
+    source: "Deepgram pricing",
+    sourceUrl: "https://deepgram.com/pricing",
+  },
+  {
+    id: "elevenlabs-free-plan",
+    title: "ElevenLabs Free Plan",
+    description:
+      "Free plan includes 10k monthly credits for text-to-speech, speech-to-text, and more.",
     category: "Productivity",
-    url: "https://www.notion.so/product/ai",
-    expiryDate: "2026-07-01",
+    url: "https://elevenlabs.io/pricing",
+    expiryDate: "Ongoing",
+    source: "ElevenLabs pricing",
+    sourceUrl: "https://elevenlabs.io/pricing",
+  },
+  {
+    id: "stability-ai-free-credits",
+    title: "Stability AI API Free Credits",
+    description:
+      "Stability AI developer platform includes 25 free credits to start generating with the API.",
+    category: "Design",
+    url: "https://platform.stability.ai/pricing",
+    expiryDate: "Ongoing",
+    source: "Stability AI Developer Platform pricing",
+    sourceUrl: "https://platform.stability.ai/pricing",
+  },
+  {
+    id: "mistral-experiment-plan",
+    title: "Mistral AI Studio Experiment Plan",
+    description:
+      "Try Mistral's API for free with the Experiment plan using a verified phone number.",
+    category: "Models",
+    url: "https://help.mistral.ai/en/articles/455206-how-can-i-try-the-api-for-free-with-the-experiment-plan",
+    expiryDate: "Ongoing",
+    source: "Mistral AI Help Center",
+    sourceUrl:
+      "https://help.mistral.ai/en/articles/455206-how-can-i-try-the-api-for-free-with-the-experiment-plan",
+  },
+  {
+    id: "cohere-trial-key",
+    title: "Cohere Trial API Key",
+    description:
+      "Cohere accounts receive a trial API key with free, rate-limited calls for evaluation.",
+    category: "Models",
+    url: "https://cohere.com/pricing",
+    expiryDate: "Ongoing",
+    source: "Cohere pricing FAQ",
+    sourceUrl: "https://cohere.com/pricing",
   },
 ];

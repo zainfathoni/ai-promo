@@ -19,6 +19,7 @@ describe("promoEntries data", () => {
     const invalidUrls = promoEntries.filter((entry) => {
       try {
         new URL(entry.url);
+        new URL(entry.sourceUrl);
         return false;
       } catch {
         return true;
@@ -28,8 +29,12 @@ describe("promoEntries data", () => {
     expect(invalidUrls).toEqual([]);
   });
 
-  it("uses ISO expiry dates that parse", () => {
+  it("uses ISO expiry dates that parse or marks ongoing", () => {
     const invalidDates = promoEntries.filter((entry) => {
+      if (entry.expiryDate === "Ongoing") {
+        return false;
+      }
+
       const parsed = parseIsoDate(entry.expiryDate);
 
       return parsed === null || entry.expiryDate !== parsed.toISOString().slice(0, 10);
