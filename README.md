@@ -1,6 +1,13 @@
 # ai-promo
 
+[![CI](https://github.com/zainfathoni/ai-promo/actions/workflows/ci.yml/badge.svg)](https://github.com/zainfathoni/ai-promo/actions/workflows/ci.yml)
+[![Vercel Deploy](https://vercelbadge.vercel.app/api/zainfathoni/ai-promo)](https://ai-promo.vercel.app)
+
 A simple community-driven list of AI promos, freebies, credits, and trial bundles.
+
+**Live Demo:** https://ai-promo.vercel.app
+
+![ai-promo preview](https://image.thum.io/get/width/1200/https://ai-promo.vercel.app)
 
 ## MVP Features
 
