@@ -9,6 +9,46 @@
   --accent-strong: #e86a1b;
   --ink: #2a2119;
   --muted: #6f6458;
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --highlight: rgba(255, 255, 255, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --panel: rgba(255, 255, 255, 0.8);
+  --panel-strong: rgba(255, 255, 255, 0.7);
+  --muted-bg: #ffe8d4;
+  --muted-text: #7a6c60;
+  --chip-bg: rgba(255, 255, 255, 0.6);
+  --halo-1: rgba(255, 201, 165, 0.4);
+  --halo-2: rgba(255, 217, 185, 0.5);
+  --hero-bg: radial-gradient(circle at top, #fffdf8 0%, #f8f3ea 55%, #efe4d6 100%);
+}
+
+[data-theme="dark"] {
+  --background: #0e1110;
+  --foreground: #f7f1e8;
+  --surface: #161b18;
+  --surface-strong: #1f2420;
+  --accent: #f9a45a;
+  --accent-strong: #f08a32;
+  --ink: #f2e7da;
+  --muted: #b9b0a6;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --highlight: rgba(22, 27, 24, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.6);
+  --panel: rgba(22, 27, 24, 0.82);
+  --panel-strong: rgba(22, 27, 24, 0.72);
+  --muted-bg: rgba(249, 164, 90, 0.18);
+  --muted-text: #c6b9ac;
+  --chip-bg: rgba(22, 27, 24, 0.6);
+  --halo-1: rgba(249, 164, 90, 0.18);
+  --halo-2: rgba(157, 207, 189, 0.18);
+  --hero-bg: radial-gradient(circle at top, #141817 0%, #0e1110 60%, #0b0d0c 100%);
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
 }
 
 @theme inline {
@@ -19,9 +59,13 @@
 }
 
 body {
-  background: radial-gradient(circle at top, #fffdf8 0%, #f8f3ea 55%, #efe4d6 100%);
+  background: var(--hero-bg);
   color: var(--foreground);
   font-family: var(--font-body), "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] body {
+  background: var(--hero-bg);
 }
 
 @keyframes rise {
