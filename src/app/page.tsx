@@ -25,12 +25,13 @@ const isActivePromo = (expiryDate: string) => {
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showExpired, setShowExpired] = useState(false);
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
-  const visibleEntries = useMemo(() => {
+  const { activeEntries, expiredEntries } = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
 
-    return promoEntries.filter((entry) => {
+    const filtered = promoEntries.filter((entry) => {
       const matchesCategory =
         selectedCategory === "All" || entry.category === selectedCategory;
       const matchesSearch =
@@ -41,7 +42,14 @@ export default function Home() {
 
       return matchesCategory && matchesSearch;
     });
+
+    const active = filtered.filter((entry) => isActivePromo(entry.expiryDate));
+    const expired = filtered.filter((entry) => !isActivePromo(entry.expiryDate));
+
+    return { activeEntries: active, expiredEntries: expired };
   }, [searchTerm, selectedCategory]);
+
+  const totalVisible = activeEntries.length + (showExpired ? expiredEntries.length : 0);
 
   return (
     <div className="min-h-screen">
@@ -154,73 +162,24 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:text-sm">
+        <div className="mt-8 flex flex-col gap-4 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:text-sm">
           <span>
-            Showing {visibleEntries.length} of {promoEntries.length} promos
+            Showing {totalVisible} of {promoEntries.length} promos
           </span>
-          <span className="font-medium text-[var(--accent-strong)]">
-            Expired promos remain for reference
-          </span>
+          {expiredEntries.length > 0 && (
+            <label className="flex cursor-pointer items-center gap-2 font-medium text-[var(--accent-strong)]">
+              <input
+                type="checkbox"
+                checked={showExpired}
+                onChange={(e) => setShowExpired(e.target.checked)}
+                className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
+              />
+              Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
+            </label>
+          )}
         </div>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          {visibleEntries.map((entry) => {
-            const isActive = isActivePromo(entry.expiryDate);
-
-            return (
-              <article
-                key={entry.id}
-                className="group flex h-full flex-col justify-between rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:-translate-y-1 hover:border-[var(--accent)]/60 hover:shadow-[0_24px_45px_-28px_rgba(249,164,90,0.35)] animate-rise"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
-                      {entry.category}
-                    </p>
-                    <h2 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
-                      {entry.title}
-                    </h2>
-                  </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.15em] ${
-                      isActive
-                        ? "bg-[var(--muted-bg)] text-[var(--accent-strong)]"
-                        : "bg-[var(--surface-strong)] text-[var(--muted-text)]"
-                    }`}
-                  >
-                    {isActive ? "Active" : "Expired"}
-                  </span>
-                </div>
-                <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                  {entry.description}
-                </p>
-                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
-                      {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
-                    </p>
-                    <p className="text-sm font-medium text-[var(--ink)]">
-                      {entry.expiryDate === "Ongoing"
-                        ? "Ongoing"
-                        : formatter.format(new Date(entry.expiryDate))}
-                    </p>
-                  </div>
-                  <a
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--accent)]/60 group-hover:text-[var(--accent-strong)] sm:w-auto"
-                    href={entry.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Visit offer
-                    <span aria-hidden>→</span>
-                  </a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        {visibleEntries.length === 0 ? (
+        {activeEntries.length === 0 && expiredEntries.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-8 text-center text-[var(--muted)] sm:p-10">
             <p className="text-base font-semibold text-[var(--ink)] sm:text-lg">
               No promos match your search.
@@ -229,7 +188,115 @@ export default function Home() {
               Try a different keyword or reset the category filter.
             </p>
           </div>
-        ) : null}
+        ) : (
+          <>
+            {activeEntries.length > 0 && (
+              <div className="mt-6">
+                <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)]">
+                  Active Promos ({activeEntries.length})
+                </h2>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {activeEntries.map((entry) => (
+                    <article
+                      key={entry.id}
+                      className="group flex h-full flex-col justify-between rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:-translate-y-1 hover:border-[var(--accent)]/60 hover:shadow-[0_24px_45px_-28px_rgba(249,164,90,0.35)] animate-rise"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
+                            {entry.category}
+                          </p>
+                          <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
+                            {entry.title}
+                          </h3>
+                        </div>
+                        <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
+                          Active
+                        </span>
+                      </div>
+                      <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                        {entry.description}
+                      </p>
+                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
+                            {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
+                          </p>
+                          <p className="text-sm font-medium text-[var(--ink)]">
+                            {entry.expiryDate === "Ongoing"
+                              ? "Ongoing"
+                              : formatter.format(new Date(entry.expiryDate))}
+                          </p>
+                        </div>
+                        <a
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--accent)]/60 group-hover:text-[var(--accent-strong)] sm:w-auto"
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Visit offer
+                          <span aria-hidden>→</span>
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {showExpired && expiredEntries.length > 0 && (
+              <div className="mt-10">
+                <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  Expired Promos ({expiredEntries.length})
+                </h2>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {expiredEntries.map((entry) => (
+                    <article
+                      key={entry.id}
+                      className="group flex h-full flex-col justify-between rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 opacity-60 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:opacity-80 animate-rise"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-xs sm:tracking-[0.3em]">
+                            {entry.category}
+                          </p>
+                          <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
+                            {entry.title}
+                          </h3>
+                        </div>
+                        <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
+                          Expired
+                        </span>
+                      </div>
+                      <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                        {entry.description}
+                      </p>
+                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">
+                            Expired
+                          </p>
+                          <p className="text-sm font-medium text-[var(--ink)]">
+                            {formatter.format(new Date(entry.expiryDate))}
+                          </p>
+                        </div>
+                        <a
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--muted)] transition group-hover:text-[var(--ink)] sm:w-auto"
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View offer
+                          <span aria-hidden>→</span>
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </section>
     </div>
   );
