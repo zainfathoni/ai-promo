@@ -1,0 +1,64 @@
+name: "New promo entry"
+description: "Submit a new AI promo/freebie for the catalog."
+title: "[Promo]: "
+labels: ["promo", "submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing a new AI promo! Please fill out the details below so we can review quickly.
+  - type: input
+    id: title
+    attributes:
+      label: Promo title
+      description: Short name of the offer.
+      placeholder: "OpenAI Startup Credits"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: One or two sentences describing the promo.
+      placeholder: "Apply for up to $2,500 in API credits for new AI startups."
+    validations:
+      required: true
+  - type: input
+    id: category
+    attributes:
+      label: Category
+      description: Suggested category (Models, Design, Hosting, Productivity, Developer Tools, Analytics).
+      placeholder: "Models"
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Link to the official promo page.
+      placeholder: "https://example.com/promo"
+    validations:
+      required: true
+  - type: input
+    id: expiry
+    attributes:
+      label: Expiry date
+      description: Use ISO format (YYYY-MM-DD).
+      placeholder: "2026-04-30"
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - Active
+        - Expired
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Optional context or references.
+      placeholder: "Eligibility requirements, region limitations, etc."
