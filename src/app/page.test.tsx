@@ -4,10 +4,18 @@ import userEvent from "@testing-library/user-event";
 
 import Home from "@/app/page";
 import { promoEntries } from "@/data/promos";
+import { ThemeProvider } from "@/app/theme-provider";
+
+const renderHome = () =>
+  render(
+    <ThemeProvider>
+      <Home />
+    </ThemeProvider>,
+  );
 
 describe("Home page", () => {
   it("renders the promo list and search controls", () => {
-    render(<Home />);
+    renderHome();
 
     expect(screen.getByText("Curated AI promos")).toBeInTheDocument();
     expect(screen.getByLabelText("Search promos")).toBeInTheDocument();
@@ -17,7 +25,7 @@ describe("Home page", () => {
 
   it("filters by search term", async () => {
     const user = userEvent.setup();
-    render(<Home />);
+    renderHome();
 
     await user.type(screen.getByLabelText("Search promos"), "Gemini");
 
@@ -27,7 +35,7 @@ describe("Home page", () => {
 
   it("filters by category", async () => {
     const user = userEvent.setup();
-    render(<Home />);
+    renderHome();
 
     await user.selectOptions(screen.getByLabelText("Category"), "Design");
 
@@ -37,10 +45,20 @@ describe("Home page", () => {
 
   it("shows an empty state when no entries match", async () => {
     const user = userEvent.setup();
-    render(<Home />);
+    renderHome();
 
     await user.type(screen.getByLabelText("Search promos"), "NoMatch");
 
     expect(screen.getByText("No promos match your search.")).toBeInTheDocument();
+  });
+
+  it("lets visitors change the theme", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.click(screen.getByRole("button", { name: "dark" }));
+
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(document.documentElement.style.colorScheme).toBe("dark");
   });
 });
