@@ -20,6 +20,7 @@ describe("Home page", () => {
     expect(screen.getByText("Curated AI promos")).toBeInTheDocument();
     expect(screen.getByLabelText("Search promos")).toBeInTheDocument();
     expect(screen.getByLabelText("Category")).toBeInTheDocument();
+    expect(screen.getByLabelText("Sort by")).toBeInTheDocument();
     expect(screen.getAllByText("Visit offer")).toHaveLength(promoEntries.length);
   });
 
@@ -41,6 +42,35 @@ describe("Home page", () => {
 
     expect(screen.getByText("Stability AI API Free Credits")).toBeInTheDocument();
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
+  });
+
+  it("sorts entries alphabetically", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.selectOptions(screen.getByLabelText("Sort by"), "Alphabetical");
+
+    const visitButtons = screen.getAllByText("Visit offer");
+    const titles = visitButtons.map((button) =>
+      button.closest("article")?.querySelector("h3")?.textContent?.trim(),
+    );
+
+    expect(titles[0]).toBe("AssemblyAI Free Tier");
+    expect(titles[titles.length - 1]).toBe("Stability AI API Free Credits");
+  });
+
+  it("sorts entries by newest first", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.selectOptions(screen.getByLabelText("Sort by"), "Newest");
+
+    const visitButtons = screen.getAllByText("Visit offer");
+    const titles = visitButtons.map((button) =>
+      button.closest("article")?.querySelector("h3")?.textContent?.trim(),
+    );
+
+    expect(titles[0]).toBe("Gemini API Free Tier");
   });
 
   it("shows an empty state when no entries match", async () => {

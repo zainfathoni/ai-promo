@@ -13,6 +13,7 @@ export type PromoEntry = {
   category: PromoCategory;
   url: string;
   expiryDate: "Ongoing" | string;
+  addedDate: string;
   source: string;
   sourceUrl: string;
 };
@@ -26,6 +27,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Models",
     url: "https://ai.google.dev/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2025-02-10",
     source: "Gemini Developer API pricing",
     sourceUrl: "https://ai.google.dev/pricing",
   },
@@ -37,6 +39,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Models",
     url: "https://huggingface.co/docs/inference-providers/en/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2025-02-06",
     source: "Hugging Face Inference Providers pricing",
     sourceUrl: "https://huggingface.co/docs/inference-providers/en/pricing",
   },
@@ -48,6 +51,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Hosting",
     url: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
     expiryDate: "Ongoing",
+    addedDate: "2025-01-25",
     source: "Cloudflare Workers AI pricing",
     sourceUrl: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
   },
@@ -59,6 +63,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Analytics",
     url: "https://www.pinecone.io/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2025-01-20",
     source: "Pinecone pricing",
     sourceUrl: "https://www.pinecone.io/pricing",
   },
@@ -70,6 +75,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Developer Tools",
     url: "https://www.assemblyai.com/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2025-01-15",
     source: "AssemblyAI pricing",
     sourceUrl: "https://www.assemblyai.com/pricing",
   },
@@ -81,6 +87,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Developer Tools",
     url: "https://deepgram.com/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2024-12-30",
     source: "Deepgram pricing",
     sourceUrl: "https://deepgram.com/pricing",
   },
@@ -92,6 +99,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Productivity",
     url: "https://elevenlabs.io/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2024-12-12",
     source: "ElevenLabs pricing",
     sourceUrl: "https://elevenlabs.io/pricing",
   },
@@ -103,6 +111,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Design",
     url: "https://platform.stability.ai/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2024-11-21",
     source: "Stability AI Developer Platform pricing",
     sourceUrl: "https://platform.stability.ai/pricing",
   },
@@ -114,6 +123,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Models",
     url: "https://help.mistral.ai/en/articles/455206-how-can-i-try-the-api-for-free-with-the-experiment-plan",
     expiryDate: "Ongoing",
+    addedDate: "2024-10-05",
     source: "Mistral AI Help Center",
     sourceUrl:
       "https://help.mistral.ai/en/articles/455206-how-can-i-try-the-api-for-free-with-the-experiment-plan",
@@ -126,6 +136,7 @@ export const promoEntries: PromoEntry[] = [
     category: "Models",
     url: "https://cohere.com/pricing",
     expiryDate: "Ongoing",
+    addedDate: "2024-09-18",
     source: "Cohere pricing FAQ",
     sourceUrl: "https://cohere.com/pricing",
   },

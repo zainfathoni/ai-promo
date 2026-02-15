@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { promoEntries } from "@/data/promos";
+import { PromoEntry, promoEntries } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
@@ -13,6 +13,15 @@ const formatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
+const sortOptions = [
+  "Expiring soon",
+  "Newest",
+  "Alphabetical",
+  "Category",
+] as const;
+
+type SortOption = (typeof sortOptions)[number];
+
 const isActivePromo = (expiryDate: string) => {
   if (expiryDate === "Ongoing") {
     return true;
@@ -22,10 +31,73 @@ const isActivePromo = (expiryDate: string) => {
   return expiry.getTime() >= Date.now();
 };
 
+const toTimestamp = (value: string) => {
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
+};
+
+const compareTitle = (a: PromoEntry, b: PromoEntry) =>
+  a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+
+const compareCategory = (a: PromoEntry, b: PromoEntry) => {
+  const categoryResult = a.category.localeCompare(b.category, "en", {
+    sensitivity: "base",
+  });
+
+  return categoryResult !== 0 ? categoryResult : compareTitle(a, b);
+};
+
+const compareExpiry = (a: PromoEntry, b: PromoEntry) => {
+  const aExpiry = a.expiryDate === "Ongoing" ? null : toTimestamp(a.expiryDate);
+  const bExpiry = b.expiryDate === "Ongoing" ? null : toTimestamp(b.expiryDate);
+
+  if (aExpiry === null && bExpiry === null) {
+    return compareTitle(a, b);
+  }
+
+  if (aExpiry === null) {
+    return 1;
+  }
+
+  if (bExpiry === null) {
+    return -1;
+  }
+
+  return aExpiry - bExpiry;
+};
+
+const compareNewest = (a: PromoEntry, b: PromoEntry) => {
+  const aAdded = toTimestamp(a.addedDate) ?? 0;
+  const bAdded = toTimestamp(b.addedDate) ?? 0;
+
+  if (aAdded === bAdded) {
+    return compareTitle(a, b);
+  }
+
+  return bAdded - aAdded;
+};
+
+const sortEntries = (entries: PromoEntry[], sortBy: SortOption) => {
+  const sorted = [...entries];
+
+  switch (sortBy) {
+    case "Expiring soon":
+      return sorted.sort(compareExpiry);
+    case "Alphabetical":
+      return sorted.sort(compareTitle);
+    case "Category":
+      return sorted.sort(compareCategory);
+    case "Newest":
+    default:
+      return sorted.sort(compareNewest);
+  }
+};
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showExpired, setShowExpired] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
   const { activeEntries, expiredEntries } = useMemo(() => {
@@ -43,11 +115,12 @@ export default function Home() {
       return matchesCategory && matchesSearch;
     });
 
-    const active = filtered.filter((entry) => isActivePromo(entry.expiryDate));
-    const expired = filtered.filter((entry) => !isActivePromo(entry.expiryDate));
+    const sorted = sortEntries(filtered, sortBy);
+    const active = sorted.filter((entry) => isActivePromo(entry.expiryDate));
+    const expired = sorted.filter((entry) => !isActivePromo(entry.expiryDate));
 
     return { activeEntries: active, expiredEntries: expired };
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, sortBy]);
 
   const totalVisible = activeEntries.length + (showExpired ? expiredEntries.length : 0);
 
@@ -136,7 +209,7 @@ export default function Home() {
       </div>
 
       <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="grid gap-4 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel)] p-6 shadow-[0_18px_40px_-30px_var(--shadow-color)] lg:grid-cols-[1.2fr_0.8fr] animate-rise">
+        <div className="grid gap-4 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel)] p-6 shadow-[0_18px_40px_-30px_var(--shadow-color)] lg:grid-cols-[1.1fr_0.65fr_0.55fr] animate-rise">
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-sm sm:tracking-[0.2em]">
             Search promos
             <input
@@ -156,6 +229,20 @@ export default function Home() {
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-sm sm:tracking-[0.2em]">
+            Sort by
+            <select
+              className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-3 text-base font-normal text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortOption)}
+            >
+              {sortOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
