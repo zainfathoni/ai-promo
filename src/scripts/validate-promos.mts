@@ -1,12 +1,17 @@
-import { promoEntries } from "../data/promos.ts";
-import {
-  findDuplicateUrls,
-  findFuzzyTitleMatches,
-} from "../data/promo-validation.ts";
+type PromoEntriesModule = typeof import("../data/promos");
+type PromoValidationModule = typeof import("../data/promo-validation");
+
+const promosModule = (await import("../data/promos")) as PromoEntriesModule;
+const promoValidationModule =
+  (await import("../data/promo-validation")) as PromoValidationModule;
+
+const { promoEntries } = promosModule;
+const { findDuplicateUrls, findFuzzyTitleMatches } = promoValidationModule;
 
 const TITLE_SIMILARITY_THRESHOLD = 0.9;
 
-const formatEntry = (entry) => `${entry.title} (${entry.id}) -> ${entry.url}`;
+const formatEntry = (entry: typeof promoEntries[number]) =>
+  `${entry.title} (${entry.id}) -> ${entry.url}`;
 
 const duplicateUrls = findDuplicateUrls(promoEntries);
 const fuzzyTitleMatches = findFuzzyTitleMatches(
