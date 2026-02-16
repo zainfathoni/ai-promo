@@ -6,6 +6,7 @@ import { promoEntries } from "@/data/promos";
 describe("promo feeds", () => {
   it("builds RSS with promo metadata", () => {
     const xml = createRssFeed({
+      baseUrl: "https://example.com",
       feedUrl: "https://example.com/feed.xml",
       siteUrl: "https://example.com",
       lastUpdated: new Date("2025-02-12T00:00:00Z"),
