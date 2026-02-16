@@ -322,17 +322,33 @@ export default function Home() {
           <span>
             Showing {totalVisible} of {promoEntries.length} promos
           </span>
-          {expiredEntries.length > 0 && (
-            <label className="flex cursor-pointer items-center gap-2 font-medium text-[var(--accent-strong)]">
-              <input
-                type="checkbox"
-                checked={showExpired}
-                onChange={(e) => setShowExpired(e.target.checked)}
-                className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
-              />
-              Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
-            </label>
-          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired) && (
+              <button
+                className="font-medium text-[var(--accent-strong)] transition hover:underline"
+                type="button"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All");
+                  setSortBy("Newest");
+                  setShowExpired(false);
+                }}
+              >
+                Reset filters
+              </button>
+            )}
+            {expiredEntries.length > 0 && (
+              <label className="flex cursor-pointer items-center gap-2 font-medium text-[var(--accent-strong)]">
+                <input
+                  type="checkbox"
+                  checked={showExpired}
+                  onChange={(e) => setShowExpired(e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
+                />
+                Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
+              </label>
+            )}
+          </div>
         </div>
 
         {activeEntries.length === 0 && expiredEntries.length === 0 ? (
