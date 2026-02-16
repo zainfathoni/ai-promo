@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { promoEntries } from "@/data/promos";
+import { promoEntries, promoTagOptions } from "@/data/promos";
 
 const parseIsoDate = (value: string) => {
   const parsed = new Date(`${value}T00:00:00Z`);
@@ -51,5 +51,14 @@ describe("promoEntries data", () => {
     });
 
     expect(invalidDates).toEqual([]);
+  });
+
+  it("assigns known tags for every entry", () => {
+    const validTags = new Set(promoTagOptions);
+    const invalidTags = promoEntries.filter((entry) =>
+      entry.tags.some((tag) => !validTags.has(tag)),
+    );
+
+    expect(invalidTags).toEqual([]);
   });
 });
