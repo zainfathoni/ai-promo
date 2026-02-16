@@ -111,8 +111,14 @@ describe("Home page", () => {
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
 
-    expect(titles[0]).toBe("Antigravity Free Tier");
-    expect(titles[titles.length - 1]).toBe("Stability AI API Free Credits");
+    const expectedTitles = [...promoEntries]
+      .sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }))
+      .map((entry) => entry.title);
+
+    expect(titles[0]).toBe(expectedTitles[0]);
+    expect(titles[titles.length - 1]).toBe(
+      expectedTitles[expectedTitles.length - 1],
+    );
   });
 
   it("sorts entries by newest first", async () => {
@@ -126,7 +132,20 @@ describe("Home page", () => {
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
 
-    expect(titles[0]).toBe("Antigravity Free Tier");
+    const expectedTitles = [...promoEntries]
+      .sort((a, b) => {
+        const aTimestamp = Date.parse(`${a.addedDate}T00:00:00Z`);
+        const bTimestamp = Date.parse(`${b.addedDate}T00:00:00Z`);
+
+        if (aTimestamp === bTimestamp) {
+          return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+        }
+
+        return bTimestamp - aTimestamp;
+      })
+      .map((entry) => entry.title);
+
+    expect(titles[0]).toBe(expectedTitles[0]);
   });
 
   it("shows an empty state when no entries match", async () => {

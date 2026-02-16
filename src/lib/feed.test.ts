@@ -38,7 +38,14 @@ describe("promo feeds", () => {
 
   it("sorts items by most recent added date", () => {
     const items = getPromoFeedItems();
+    const expectedTitles = [...promoEntries]
+      .sort((a, b) => {
+        const aTimestamp = Date.parse(`${a.addedDate}T00:00:00Z`);
+        const bTimestamp = Date.parse(`${b.addedDate}T00:00:00Z`);
+        return bTimestamp - aTimestamp;
+      })
+      .map((entry) => entry.title);
 
-    expect(items[0].title).toBe("Antigravity Free Tier");
+    expect(items[0].title).toBe(expectedTitles[0]);
   });
 });
