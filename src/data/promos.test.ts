@@ -42,4 +42,14 @@ describe("promoEntries data", () => {
 
     expect(invalidDates).toEqual([]);
   });
+
+  it("uses ISO added dates that parse", () => {
+    const invalidDates = promoEntries.filter((entry) => {
+      const parsed = parseIsoDate(entry.addedDate);
+
+      return parsed === null || entry.addedDate !== parsed.toISOString().slice(0, 10);
+    });
+
+    expect(invalidDates).toEqual([]);
+  });
 });
