@@ -55,6 +55,27 @@ describe("Home page", () => {
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
   });
 
+  it("shows the reset button when tags are active and clears tags", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    expect(
+      screen.queryByRole("button", { name: "Reset all filters to default" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "credits" }));
+
+    const resetButton = screen.getByRole("button", {
+      name: "Reset all filters to default",
+    });
+    expect(resetButton).toBeInTheDocument();
+    expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
+
+    await user.click(resetButton);
+
+    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+  });
+
   it("sorts entries alphabetically", async () => {
     const user = userEvent.setup();
     renderHome();

@@ -361,7 +361,7 @@ export default function Home() {
             Showing {totalVisible} of {promoEntries.length} promos
           </span>
           <div className="flex flex-wrap items-center gap-4">
-            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired) && (
+            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired || selectedTags.size > 0) && (
               <button
                 aria-label="Reset all filters to default"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-4 py-2.5 font-medium text-[var(--accent-strong)] shadow-sm transition-all duration-200 hover:bg-[var(--muted-bg)] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 active:translate-y-0"
@@ -371,6 +371,7 @@ export default function Home() {
                   setSelectedCategory("All");
                   setSortBy("Newest");
                   setShowExpired(false);
+                  clearTags();
                 }}
               >
                 <RefreshIcon />
