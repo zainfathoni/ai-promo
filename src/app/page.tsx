@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 
-import { PromoEntry, promoEntries } from "@/data/promos";
+import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
+const tagFilters = ["All", ...promoTagOptions];
 
 const formatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -96,6 +97,7 @@ const sortEntries = (entries: PromoEntry[], sortBy: SortOption) => {
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
@@ -106,13 +108,17 @@ export default function Home() {
     const filtered = promoEntries.filter((entry) => {
       const matchesCategory =
         selectedCategory === "All" || entry.category === selectedCategory;
+      const matchesTags =
+        selectedTags.size === 0 ||
+        Array.from(selectedTags).every((tag) => entry.tags.includes(tag as PromoTag));
       const matchesSearch =
         normalized.length === 0 ||
         entry.title.toLowerCase().includes(normalized) ||
         entry.description.toLowerCase().includes(normalized) ||
-        entry.category.toLowerCase().includes(normalized);
+        entry.category.toLowerCase().includes(normalized) ||
+        entry.tags.some((tag) => tag.toLowerCase().includes(normalized));
 
-      return matchesCategory && matchesSearch;
+      return matchesCategory && matchesTags && matchesSearch;
     });
 
     const sorted = sortEntries(filtered, sortBy);
@@ -120,7 +126,25 @@ export default function Home() {
     const expired = sorted.filter((entry) => !isActivePromo(entry.expiryDate));
 
     return { activeEntries: active, expiredEntries: expired };
-  }, [searchTerm, selectedCategory, sortBy]);
+  }, [searchTerm, selectedCategory, selectedTags, sortBy]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+
+      return next;
+    });
+  };
+
+  const clearTags = () => {
+    setSelectedTags(new Set());
+  };
 
   const totalVisible = activeEntries.length + (showExpired ? expiredEntries.length : 0);
 
@@ -249,6 +273,51 @@ export default function Home() {
           </label>
         </div>
 
+        <div className="mt-5 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-5 shadow-[0_12px_32px_-28px_var(--shadow-color)] animate-rise">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-sm">
+              Tag filters
+            </p>
+            {selectedTags.size > 0 && (
+              <button
+                className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:-translate-y-0.5 hover:bg-[var(--muted-bg)]"
+                type="button"
+                onClick={clearTags}
+              >
+                Clear tags
+              </button>
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {tagFilters.map((tag) => {
+              const isAll = tag === "All";
+              const isActive = isAll ? selectedTags.size === 0 : selectedTags.has(tag);
+
+              return (
+                <button
+                  key={tag}
+                  className={`rounded-full border px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] transition ${
+                    isActive
+                      ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                      : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                  }`}
+                  type="button"
+                  onClick={() => {
+                    if (isAll) {
+                      clearTags();
+                      return;
+                    }
+
+                    toggleTag(tag);
+                  }}
+                >
+                  {tag.replace(/-/g, " ")}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="mt-8 flex flex-col gap-4 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:text-sm">
           <span>
             Showing {totalVisible} of {promoEntries.length} promos
@@ -304,6 +373,16 @@ export default function Home() {
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {entry.tags.map((tag) => (
+                          <span
+                            key={`${entry.id}-${tag}`}
+                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
+                          >
+                            {tag.replace(/-/g, " ")}
+                          </span>
+                        ))}
+                      </div>
                       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
@@ -358,6 +437,16 @@ export default function Home() {
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {entry.tags.map((tag) => (
+                          <span
+                            key={`${entry.id}-${tag}`}
+                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
+                          >
+                            {tag.replace(/-/g, " ")}
+                          </span>
+                        ))}
+                      </div>
                       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">

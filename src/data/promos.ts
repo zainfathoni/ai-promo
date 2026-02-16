@@ -6,11 +6,23 @@ export type PromoCategory =
   | "Developer Tools"
   | "Analytics";
 
+export const promoTagOptions = [
+  "free-tier",
+  "credits",
+  "trial",
+  "startup-only",
+  "student",
+  "open-source",
+] as const;
+
+export type PromoTag = (typeof promoTagOptions)[number];
+
 export type PromoEntry = {
   id: string;
   title: string;
   description: string;
   category: PromoCategory;
+  tags: PromoTag[];
   url: string;
   expiryDate: "Ongoing" | string;
   addedDate: string;
@@ -25,6 +37,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Free input and output tokens plus Google AI Studio access for Gemini API experimentation.",
     category: "Models",
+    tags: ["free-tier", "student"],
     url: "https://ai.google.dev/pricing",
     expiryDate: "Ongoing",
     addedDate: "2025-02-10",
@@ -37,6 +50,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Free users receive monthly credits to try serverless inference via Hugging Face Inference Providers.",
     category: "Models",
+    tags: ["credits", "open-source"],
     url: "https://huggingface.co/docs/inference-providers/en/pricing",
     expiryDate: "Ongoing",
     addedDate: "2025-02-06",
@@ -49,6 +63,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Workers AI includes 10,000 free neurons per day before paid usage applies.",
     category: "Hosting",
+    tags: ["free-tier", "startup-only"],
     url: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
     expiryDate: "Ongoing",
     addedDate: "2025-01-25",
@@ -61,6 +76,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Start for free with Pinecone's Starter plan for vector database, inference, and assistant usage.",
     category: "Analytics",
+    tags: ["free-tier", "startup-only"],
     url: "https://www.pinecone.io/pricing",
     expiryDate: "Ongoing",
     addedDate: "2025-01-20",
@@ -73,6 +89,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Free tier includes up to 185 hours of pre-recorded transcription and 333 hours of streaming.",
     category: "Developer Tools",
+    tags: ["free-tier"],
     url: "https://www.assemblyai.com/pricing",
     expiryDate: "Ongoing",
     addedDate: "2025-01-15",
@@ -85,6 +102,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Sign up free to get $200 in Deepgram credits with no credit card required.",
     category: "Developer Tools",
+    tags: ["credits"],
     url: "https://deepgram.com/pricing",
     expiryDate: "Ongoing",
     addedDate: "2024-12-30",
@@ -97,6 +115,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Free plan includes 10k monthly credits for text-to-speech, speech-to-text, and more.",
     category: "Productivity",
+    tags: ["free-tier", "student"],
     url: "https://elevenlabs.io/pricing",
     expiryDate: "Ongoing",
     addedDate: "2024-12-12",
@@ -109,6 +128,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Stability AI developer platform includes 25 free credits to start generating with the API.",
     category: "Design",
+    tags: ["credits"],
     url: "https://platform.stability.ai/pricing",
     expiryDate: "Ongoing",
     addedDate: "2024-11-21",
@@ -121,6 +141,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Try Mistral's API for free with the Experiment plan using a verified phone number.",
     category: "Models",
+    tags: ["trial"],
     url: "https://help.mistral.ai/en/articles/455206-how-can-i-try-the-api-for-free-with-the-experiment-plan",
     expiryDate: "Ongoing",
     addedDate: "2024-10-05",
@@ -134,6 +155,7 @@ export const promoEntries: PromoEntry[] = [
     description:
       "Cohere accounts receive a trial API key with free, rate-limited calls for evaluation.",
     category: "Models",
+    tags: ["trial", "startup-only"],
     url: "https://cohere.com/pricing",
     expiryDate: "Ongoing",
     addedDate: "2024-09-18",

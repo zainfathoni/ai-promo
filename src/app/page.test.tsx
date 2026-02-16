@@ -21,6 +21,7 @@ describe("Home page", () => {
     expect(screen.getByLabelText("Search promos")).toBeInTheDocument();
     expect(screen.getByLabelText("Category")).toBeInTheDocument();
     expect(screen.getByLabelText("Sort by")).toBeInTheDocument();
+    expect(screen.getByText("Tag filters")).toBeInTheDocument();
     expect(screen.getAllByText("Visit offer")).toHaveLength(promoEntries.length);
   });
 
@@ -41,6 +42,16 @@ describe("Home page", () => {
     await user.selectOptions(screen.getByLabelText("Category"), "Design");
 
     expect(screen.getByText("Stability AI API Free Credits")).toBeInTheDocument();
+    expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
+  });
+
+  it("filters by tags", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.click(screen.getByRole("button", { name: "credits" }));
+
+    expect(screen.getByText("Deepgram $200 Free Credit")).toBeInTheDocument();
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
   });
 
