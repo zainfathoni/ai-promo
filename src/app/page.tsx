@@ -5,6 +5,44 @@ import { useMemo, useState } from "react";
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 
+const RefreshIcon = () => (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    focusable="false"
+    height="14"
+    strokeWidth="2.5"
+    viewBox="0 0 24 24"
+    width="14"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21 3v5h-5"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3 21v-5h5"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
 const tagFilters = ["All", ...promoTagOptions];
 
@@ -325,7 +363,8 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-4">
             {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired) && (
               <button
-                className="font-medium text-[var(--accent-strong)] transition hover:underline"
+                aria-label="Reset all filters to default"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-4 py-2.5 font-medium text-[var(--accent-strong)] shadow-sm transition-all duration-200 hover:bg-[var(--muted-bg)] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 active:translate-y-0"
                 type="button"
                 onClick={() => {
                   setSearchTerm("");
@@ -334,7 +373,8 @@ export default function Home() {
                   setShowExpired(false);
                 }}
               >
-                Reset filters
+                <RefreshIcon />
+                <span>Reset filters</span>
               </button>
             )}
             {expiredEntries.length > 0 && (
