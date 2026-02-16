@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
+import { siteMetadata } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -14,8 +15,13 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "ai-promo",
-  description: "A curated hub for AI promos, credits, and freebies.",
+  title: siteMetadata.title,
+  description: siteMetadata.description,
+  alternates: {
+    types: {
+      "application/rss+xml": "feed.xml",
+    },
+  },
 };
 
 export default function RootLayout({
