@@ -39,6 +39,6 @@ describe("promo feeds", () => {
   it("sorts items by most recent added date", () => {
     const items = getPromoFeedItems();
 
-    expect(items[0].title).toBe("Gemini API Free Tier");
+    expect(items[0].title).toBe("Antigravity Free Tier");
   });
 });

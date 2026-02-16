@@ -111,7 +111,7 @@ describe("Home page", () => {
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
 
-    expect(titles[0]).toBe("AssemblyAI Free Tier");
+    expect(titles[0]).toBe("Antigravity Free Tier");
     expect(titles[titles.length - 1]).toBe("Stability AI API Free Credits");
   });
 
@@ -126,7 +126,7 @@ describe("Home page", () => {
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
 
-    expect(titles[0]).toBe("Gemini API Free Tier");
+    expect(titles[0]).toBe("Antigravity Free Tier");
   });
 
   it("shows an empty state when no entries match", async () => {
