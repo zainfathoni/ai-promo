@@ -162,4 +162,17 @@ export const promoEntries: PromoEntry[] = [
     source: "Cohere pricing FAQ",
     sourceUrl: "https://cohere.com/pricing",
   },
+  {
+    id: "antigravity-free-tier",
+    title: "Antigravity Free Tier",
+    description:
+      "Free tier includes access to Gemini 3 Pro and Flash, Claude Sonnet and Opus 4.5, gpt-oss-120b, plus unlimited tab completions and command requests with generous weekly limits.",
+    category: "Developer Tools",
+    tags: ["free-tier"],
+    url: "https://antigravity.google/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-17",
+    source: "Antigravity pricing",
+    sourceUrl: "https://antigravity.google/pricing",
+  },
 ];
