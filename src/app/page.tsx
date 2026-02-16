@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
+import { RefreshIcon } from "@/components/icons";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
 const tagFilters = ["All", ...promoTagOptions];
@@ -322,17 +323,36 @@ export default function Home() {
           <span>
             Showing {totalVisible} of {promoEntries.length} promos
           </span>
-          {expiredEntries.length > 0 && (
-            <label className="flex cursor-pointer items-center gap-2 font-medium text-[var(--accent-strong)]">
-              <input
-                type="checkbox"
-                checked={showExpired}
-                onChange={(e) => setShowExpired(e.target.checked)}
-                className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
-              />
-              Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
-            </label>
-          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired || selectedTags.size > 0) && (
+              <button
+                aria-label="Reset all filters to default"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-4 py-2.5 font-medium text-[var(--accent-strong)] shadow-sm transition-all duration-200 hover:bg-[var(--muted-bg)] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 active:translate-y-0"
+                type="button"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All");
+                  setSortBy("Newest");
+                  setShowExpired(false);
+                  clearTags();
+                }}
+              >
+                <RefreshIcon />
+                <span>Reset filters</span>
+              </button>
+            )}
+            {expiredEntries.length > 0 && (
+              <label className="flex cursor-pointer items-center gap-2 font-medium text-[var(--accent-strong)]">
+                <input
+                  type="checkbox"
+                  checked={showExpired}
+                  onChange={(e) => setShowExpired(e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
+                />
+                Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
+              </label>
+            )}
+          </div>
         </div>
 
         {activeEntries.length === 0 && expiredEntries.length === 0 ? (

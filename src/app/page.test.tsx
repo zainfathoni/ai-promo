@@ -55,6 +55,51 @@ describe("Home page", () => {
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
   });
 
+  it("shows the reset button when tags are active and clears tags", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    expect(
+      screen.queryByRole("button", { name: "Reset all filters to default" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "credits" }));
+
+    const resetButton = screen.getByRole("button", {
+      name: "Reset all filters to default",
+    });
+    expect(resetButton).toBeInTheDocument();
+    expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
+
+    await user.click(resetButton);
+
+    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+  });
+
+  it("resets all filters together", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.type(screen.getByLabelText("Search promos"), "Gemini");
+    await user.selectOptions(screen.getByLabelText("Category"), "Models");
+    await user.selectOptions(screen.getByLabelText("Sort by"), "Alphabetical");
+    await user.click(screen.getByRole("button", { name: "credits" }));
+
+    const resetButton = screen.getByRole("button", {
+      name: "Reset all filters to default",
+    });
+
+    await user.click(resetButton);
+
+    expect(screen.getByLabelText("Search promos")).toHaveValue("");
+    expect(screen.getByLabelText("Category")).toHaveValue("All");
+    expect(screen.getByLabelText("Sort by")).toHaveValue("Newest");
+    expect(screen.getByRole("button", { name: "All" })).toHaveClass(
+      "border-[var(--accent)]",
+    );
+    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+  });
+
   it("sorts entries alphabetically", async () => {
     const user = userEvent.setup();
     renderHome();
