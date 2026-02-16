@@ -9,7 +9,13 @@ import {
   titleSimilarity,
 } from "./promo-validation";
 
-const createEntry = (overrides: Partial<PromoEntry>): PromoEntry => ({
+type PromoEntryOverrides = Partial<Omit<PromoEntry, "addedDate" | "source" | "sourceUrl">> & {
+  addedDate?: string;
+  source?: string;
+  sourceUrl?: string;
+};
+
+const createEntry = (overrides: PromoEntryOverrides): PromoEntry => ({
   id: "sample",
   title: "Sample Promo",
   description: "Sample description",
@@ -17,6 +23,9 @@ const createEntry = (overrides: Partial<PromoEntry>): PromoEntry => ({
   url: "https://example.com/free",
   expiryDate: "Ongoing",
   ...overrides,
+  addedDate: overrides.addedDate ?? "2026-01-01",
+  source: overrides.source ?? "Example",
+  sourceUrl: overrides.sourceUrl ?? "https://example.com/free",
 });
 
 describe("promo validation", () => {
