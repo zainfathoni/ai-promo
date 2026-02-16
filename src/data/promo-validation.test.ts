@@ -9,37 +9,37 @@ import {
   titleSimilarity,
 } from "./promo-validation";
 
-const createEntry = (overrides: Partial<PromoEntry>): PromoEntry => ({
+type PromoEntryOverrides = Partial<Omit<PromoEntry, "source" | "sourceUrl">> & {
+  source?: string;
+  sourceUrl?: string;
+};
+
+const createEntry = (overrides: PromoEntryOverrides): PromoEntry => ({
   id: "sample",
   title: "Sample Promo",
   description: "Sample description",
   category: "Models",
   url: "https://example.com/free",
   expiryDate: "Ongoing",
-  source: "Example",
-  sourceUrl: "https://example.com/free",
   ...overrides,
+  source: overrides.source ?? "Example",
+  sourceUrl: overrides.sourceUrl ?? "https://example.com/free",
 });
 
 describe("promo validation", () => {
   it("normalizes URLs to hostname + pathname", () => {
-    expect(normalizeUrl("https://www.Example.com/path/"))
-      .toBe("example.com/path");
-    expect(normalizeUrl("https://example.com/"))
-      .toBe("example.com/");
+    expect(normalizeUrl("https://www.Example.com/path/")).toBe("example.com/path");
+    expect(normalizeUrl("https://example.com/")).toBe("example.com/");
   });
 
   it("normalizes titles", () => {
-    expect(normalizeTitle("Hello, World!"))
-      .toBe("hello world");
+    expect(normalizeTitle("Hello, World!")).toBe("hello world");
   });
 
   it("calculates title similarity", () => {
     expect(titleSimilarity("AI Promo", "AI Promo")).toBe(1);
-    expect(titleSimilarity("AI Promo", "Different"))
-      .toBe(0);
-    expect(titleSimilarity("AI Promo", "AI Promo Offer"))
-      .toBeCloseTo(0.8);
+    expect(titleSimilarity("AI Promo", "Different")).toBe(0);
+    expect(titleSimilarity("AI Promo", "AI Promo Offer")).toBeCloseTo(0.8);
   });
 
   it("finds duplicate URLs", () => {
@@ -52,8 +52,7 @@ describe("promo validation", () => {
     const duplicates = findDuplicateUrls(entries);
 
     expect(duplicates).toHaveLength(1);
-    expect(duplicates[0].entries.map((entry) => entry.id))
-      .toEqual(["one", "two"]);
+    expect(duplicates[0].entries.map((entry) => entry.id)).toEqual(["one", "two"]);
   });
 
   it("finds fuzzy title matches", () => {
@@ -66,7 +65,6 @@ describe("promo validation", () => {
     const matches = findFuzzyTitleMatches(entries, 0.8);
 
     expect(matches).toHaveLength(1);
-    expect(matches[0].entries.map((entry) => entry.id))
-      .toEqual(["one", "two"]);
+    expect(matches[0].entries.map((entry) => entry.id)).toEqual(["one", "two"]);
   });
 });

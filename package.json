@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "validate": "tsx src/scripts/validate-promos.mts",
+    "validate": "node src/scripts/validate-promos.mjs",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -30,7 +30,6 @@
     "eslint-config-next": "16.1.6",
     "jsdom": "^28.1.0",
     "tailwindcss": "^4",
-    "tsx": "^4.20.5",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }
