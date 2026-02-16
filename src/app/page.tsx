@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { promoEntries, promoTagOptions, type PromoEntry } from "@/data/promos";
+import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
@@ -110,7 +110,7 @@ export default function Home() {
         selectedCategory === "All" || entry.category === selectedCategory;
       const matchesTags =
         selectedTags.size === 0 ||
-        Array.from(selectedTags).every((tag) => entry.tags.includes(tag));
+        Array.from(selectedTags).every((tag) => entry.tags.includes(tag as PromoTag));
       const matchesSearch =
         normalized.length === 0 ||
         entry.title.toLowerCase().includes(normalized) ||

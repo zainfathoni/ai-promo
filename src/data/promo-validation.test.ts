@@ -20,6 +20,7 @@ const createEntry = (overrides: PromoEntryOverrides): PromoEntry => ({
   title: "Sample Promo",
   description: "Sample description",
   category: "Models",
+  tags: [],
   url: "https://example.com/free",
   expiryDate: "Ongoing",
   ...overrides,
