@@ -6,6 +6,22 @@ import Home from "@/app/page";
 import { promoEntries } from "@/data/promos";
 import { ThemeProvider } from "@/app/theme-provider";
 
+const newestPromoTitle = [...promoEntries]
+  .sort((a, b) => {
+    const aTimestamp = Date.parse(`${a.addedDate}T00:00:00Z`);
+    const bTimestamp = Date.parse(`${b.addedDate}T00:00:00Z`);
+
+    if (aTimestamp === bTimestamp) {
+      return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+    }
+
+    return bTimestamp - aTimestamp;
+  })[0]?.title;
+
+if (!newestPromoTitle) {
+  throw new Error("Expected at least one promo entry for tests.");
+}
+
 const renderHome = () =>
   render(
     <ThemeProvider>
@@ -75,7 +91,7 @@ describe("Home page", () => {
 
     await user.click(resetButton);
 
-    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+    expect(screen.getByText(newestPromoTitle)).toBeInTheDocument();
   });
 
   it("resets all filters together", async () => {
@@ -99,7 +115,7 @@ describe("Home page", () => {
     expect(screen.getByRole("button", { name: "All" })).toHaveClass(
       "border-[var(--accent)]",
     );
-    expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
+    expect(screen.getByText(newestPromoTitle)).toBeInTheDocument();
   });
 
   it("sorts entries alphabetically", async () => {

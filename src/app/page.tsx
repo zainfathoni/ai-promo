@@ -2,13 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
+import {
+  promoCategoryOptions,
+  promoEntries,
+  promoTagOptions,
+  type PromoEntry,
+  type PromoTag,
+} from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 import { HeartIcon, RefreshIcon } from "@/components/icons";
 import { PromoStructuredData } from "@/components/promo-structured-data";
 import { siteMetadata } from "@/lib/site";
 
-const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
+const categories = ["All", ...promoCategoryOptions];
 const tagFilters = ["All", ...promoTagOptions];
 
 const formatter = new Intl.DateTimeFormat("en-US", {

@@ -4,7 +4,28 @@ export type PromoCategory =
   | "Hosting"
   | "Productivity"
   | "Developer Tools"
-  | "Analytics";
+  | "Analytics"
+  | "Education"
+  | "Infrastructure"
+  | "Data"
+  | "Security"
+  | "Open Source"
+  | "Startup Programs";
+
+export const promoCategoryOptions: PromoCategory[] = [
+  "Models",
+  "Design",
+  "Hosting",
+  "Productivity",
+  "Developer Tools",
+  "Analytics",
+  "Education",
+  "Infrastructure",
+  "Data",
+  "Security",
+  "Open Source",
+  "Startup Programs",
+];
 
 export const promoTagOptions = [
   "free-tier",
@@ -222,5 +243,174 @@ export const promoEntries: PromoEntry[] = [
     sourceUrl: "https://www.loom.com/pricing",
     submittedBy: "ai-promo-bot",
     verifiedAt: "2026-02-11",
+  },
+  {
+    id: "azure-for-students-credit",
+    title: "Azure for Students $100 Credit",
+    description:
+      "Students receive $100 in Azure credit plus select free services without a credit card.",
+    category: "Education",
+    tags: ["credits", "student"],
+    url: "https://azure.microsoft.com/free/students/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Azure for Students",
+    sourceUrl: "https://azure.microsoft.com/free/students/",
+  },
+  {
+    id: "github-student-developer-pack",
+    title: "GitHub Student Developer Pack",
+    description:
+      "Verified students get free tools, cloud credits, and learning resources via the GitHub Student Pack.",
+    category: "Education",
+    tags: ["free-tier", "student"],
+    url: "https://education.github.com/pack",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "GitHub Education",
+    sourceUrl: "https://education.github.com/pack",
+  },
+  {
+    id: "aws-free-tier",
+    title: "AWS Free Tier",
+    description:
+      "AWS Free Tier includes 12 months of free services plus always-free infrastructure offerings.",
+    category: "Infrastructure",
+    tags: ["free-tier"],
+    url: "https://aws.amazon.com/free/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "AWS Free Tier",
+    sourceUrl: "https://aws.amazon.com/free/",
+  },
+  {
+    id: "google-cloud-free-tier",
+    title: "Google Cloud Free Tier",
+    description:
+      "Google Cloud offers $300 in credits for new accounts plus always-free products to get started.",
+    category: "Infrastructure",
+    tags: ["credits", "free-tier"],
+    url: "https://cloud.google.com/free",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Google Cloud Free Tier",
+    sourceUrl: "https://cloud.google.com/free",
+  },
+  {
+    id: "mongodb-atlas-free-tier",
+    title: "MongoDB Atlas Free Tier",
+    description:
+      "MongoDB Atlas includes a free M0 sandbox cluster for development and evaluation.",
+    category: "Data",
+    tags: ["free-tier"],
+    url: "https://www.mongodb.com/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "MongoDB Atlas pricing",
+    sourceUrl: "https://www.mongodb.com/pricing",
+  },
+  {
+    id: "supabase-free-plan",
+    title: "Supabase Free Plan",
+    description:
+      "Supabase Free plan includes a Postgres database, storage, and auth with generous limits.",
+    category: "Data",
+    tags: ["free-tier"],
+    url: "https://supabase.com/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Supabase pricing",
+    sourceUrl: "https://supabase.com/pricing",
+  },
+  {
+    id: "snyk-free-plan",
+    title: "Snyk Free Plan",
+    description:
+      "Snyk's free plan offers vulnerability scanning for open source dependencies and containers.",
+    category: "Security",
+    tags: ["free-tier"],
+    url: "https://snyk.io/plans/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Snyk plans",
+    sourceUrl: "https://snyk.io/plans/",
+  },
+  {
+    id: "cloudflare-zero-trust-free",
+    title: "Cloudflare Zero Trust Free Plan",
+    description:
+      "Cloudflare Zero Trust includes a free tier for secure access, DNS filtering, and device posture.",
+    category: "Security",
+    tags: ["free-tier"],
+    url: "https://www.cloudflare.com/zero-trust/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Cloudflare Zero Trust",
+    sourceUrl: "https://www.cloudflare.com/zero-trust/",
+  },
+  {
+    id: "github-copilot-open-source",
+    title: "GitHub Copilot for Open Source Maintainers",
+    description:
+      "GitHub Copilot is free for verified maintainers of popular open source projects.",
+    category: "Open Source",
+    tags: ["free-tier", "open-source"],
+    url: "https://github.com/features/copilot",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "GitHub Copilot pricing",
+    sourceUrl: "https://github.com/features/copilot#pricing",
+  },
+  {
+    id: "jetbrains-open-source-license",
+    title: "JetBrains Open Source License",
+    description:
+      "JetBrains provides free IDE licenses for qualifying open source projects and teams.",
+    category: "Open Source",
+    tags: ["free-tier", "open-source"],
+    url: "https://www.jetbrains.com/community/opensource/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "JetBrains Open Source Support",
+    sourceUrl: "https://www.jetbrains.com/community/opensource/",
+  },
+  {
+    id: "google-for-startups-cloud",
+    title: "Google for Startups Cloud Program",
+    description:
+      "Eligible startups receive Google Cloud credits plus access to mentors and community programs.",
+    category: "Startup Programs",
+    tags: ["startup-only", "credits"],
+    url: "https://cloud.google.com/startup",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Google for Startups Cloud Program",
+    sourceUrl: "https://cloud.google.com/startup",
+  },
+  {
+    id: "aws-activate-credits",
+    title: "AWS Activate Credits",
+    description:
+      "AWS Activate provides credits, technical support, and training for qualifying startups.",
+    category: "Startup Programs",
+    tags: ["startup-only", "credits"],
+    url: "https://aws.amazon.com/activate/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "AWS Activate",
+    sourceUrl: "https://aws.amazon.com/activate/",
+  },
+  {
+    id: "microsoft-for-startups-founders-hub",
+    title: "Microsoft for Startups Founders Hub",
+    description:
+      "Founders Hub offers Azure credits, GitHub benefits, and startup support across stages.",
+    category: "Startup Programs",
+    tags: ["startup-only", "credits"],
+    url: "https://startups.microsoft.com/",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Microsoft for Startups Founders Hub",
+    sourceUrl: "https://startups.microsoft.com/",
   },
 ];
