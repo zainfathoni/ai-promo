@@ -27,7 +27,9 @@ export type PromoEntry = {
   expiryDate: "Ongoing" | string;
   addedDate: string;
   source: string;
-  sourceUrl: string;
+  sourceUrl?: string;
+  submittedBy?: string;
+  verifiedAt?: string;
 };
 
 export const promoEntries: PromoEntry[] = [
@@ -174,5 +176,50 @@ export const promoEntries: PromoEntry[] = [
     addedDate: "2026-02-17",
     source: "Antigravity pricing",
     sourceUrl: "https://antigravity.google/pricing",
+  },
+  {
+    id: "openrouter-starter-credits",
+    title: "OpenRouter Starter Credits",
+    description:
+      "New accounts receive starter credits to test OpenRouter's hosted model catalog.",
+    category: "Models",
+    tags: ["credits"],
+    url: "https://openrouter.ai/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-14",
+    source: "OpenRouter pricing",
+    sourceUrl: "https://openrouter.ai/pricing",
+    submittedBy: "wheeljackz",
+    verifiedAt: "2026-02-14",
+  },
+  {
+    id: "pika-free-trial",
+    title: "Pika Labs Free Trial",
+    description:
+      "Pika offers a limited free trial for new accounts to explore AI video generation.",
+    category: "Design",
+    tags: ["trial"],
+    url: "https://pika.art/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-13",
+    source: "Pika pricing",
+    sourceUrl: "https://pika.art/pricing",
+    submittedBy: "octocat",
+    verifiedAt: "2026-02-12",
+  },
+  {
+    id: "loom-ai-starter",
+    title: "Loom AI Starter Plan",
+    description:
+      "Loom's starter tier includes AI-powered summaries and transcription credits.",
+    category: "Productivity",
+    tags: ["free-tier"],
+    url: "https://www.loom.com/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-11",
+    source: "Loom pricing",
+    sourceUrl: "https://www.loom.com/pricing",
+    submittedBy: "ai-promo-bot",
+    verifiedAt: "2026-02-11",
   },
 ];

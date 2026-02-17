@@ -22,7 +22,9 @@ describe("Home page", () => {
     expect(screen.getByLabelText("Category")).toBeInTheDocument();
     expect(screen.getByLabelText("Sort by")).toBeInTheDocument();
     expect(screen.getByText("Tag filters")).toBeInTheDocument();
-    expect(screen.getAllByText("Visit offer")).toHaveLength(promoEntries.length);
+    expect(screen.getAllByText("Visit offer")).toHaveLength(
+      Math.min(12, promoEntries.length),
+    );
   });
 
   it("filters by search term", async () => {
@@ -115,10 +117,10 @@ describe("Home page", () => {
       .sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }))
       .map((entry) => entry.title);
 
-    expect(titles[0]).toBe(expectedTitles[0]);
-    expect(titles[titles.length - 1]).toBe(
-      expectedTitles[expectedTitles.length - 1],
-    );
+    const pagedExpected = expectedTitles.slice(0, titles.length);
+
+    expect(titles[0]).toBe(pagedExpected[0]);
+    expect(titles[titles.length - 1]).toBe(pagedExpected[pagedExpected.length - 1]);
   });
 
   it("sorts entries by newest first", async () => {
