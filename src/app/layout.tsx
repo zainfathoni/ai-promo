@@ -17,10 +17,37 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: siteMetadata.title,
   description: siteMetadata.description,
+  metadataBase: new URL(siteMetadata.url),
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": "feed.xml",
     },
+  },
+  openGraph: {
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    url: siteMetadata.url,
+    siteName: siteMetadata.title,
+    type: "website",
+    images: [
+      {
+        url: siteMetadata.ogImage,
+        width: 1200,
+        height: 630,
+        alt: "ai-promo promo roundup",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    images: [siteMetadata.ogImage],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

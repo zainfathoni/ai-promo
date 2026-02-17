@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 import { RefreshIcon } from "@/components/icons";
+import { PromoStructuredData } from "@/components/promo-structured-data";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
 const tagFilters = ["All", ...promoTagOptions];
@@ -151,6 +152,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <PromoStructuredData />
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <div className="absolute -top-32 right-10 h-72 w-72 rounded-full bg-[var(--halo-1)] opacity-80 blur-3xl" />
