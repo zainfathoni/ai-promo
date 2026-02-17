@@ -35,3 +35,30 @@ export const RefreshIcon = () => (
     />
   </svg>
 );
+
+type HeartIconProps = {
+  filled?: boolean;
+  className?: string;
+};
+
+export const HeartIcon = ({ filled = false, className }: HeartIconProps) => (
+  <svg
+    aria-hidden="true"
+    className={className}
+    fill={filled ? "currentColor" : "none"}
+    focusable="false"
+    height="16"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M20.8 4.6a5.5 5.5 0 0 0-7.78 0L12 5.62l-1.02-1.02a5.5 5.5 0 0 0-7.78 7.78l1.02 1.02L12 20.9l7.78-7.48 1.02-1.02a5.5 5.5 0 0 0 0-7.78Z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
