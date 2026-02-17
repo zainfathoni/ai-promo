@@ -1,30 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0b0f1a" />
-      <stop offset="50%" stop-color="#1c1f2e" />
-      <stop offset="100%" stop-color="#2d1f2b" />
+      <stop offset="0%" stop-color="#0b1020" />
+      <stop offset="45%" stop-color="#101828" />
+      <stop offset="100%" stop-color="#1c2236" />
     </linearGradient>
     <radialGradient id="halo" cx="0.8" cy="0.2" r="0.6">
-      <stop offset="0%" stop-color="#ffb86c" stop-opacity="0.7" />
-      <stop offset="60%" stop-color="#ff7b47" stop-opacity="0.2" />
-      <stop offset="100%" stop-color="#ff7b47" stop-opacity="0" />
+      <stop offset="0%" stop-color="#facc15" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#f97316" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#0b1020" stop-opacity="0" />
     </radialGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#111c2f" />
+      <stop offset="100%" stop-color="#0b1326" />
+    </linearGradient>
+    <linearGradient id="tag" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#f97316" />
       <stop offset="100%" stop-color="#facc15" />
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)" />
   <rect width="1200" height="630" fill="url(#halo)" />
-  <circle cx="170" cy="520" r="180" fill="#1f2937" opacity="0.55" />
-  <circle cx="1080" cy="120" r="140" fill="#312e81" opacity="0.5" />
-  <rect x="90" y="110" width="1020" height="410" rx="42" fill="#0f172a" opacity="0.88" />
-  <rect x="110" y="130" width="980" height="370" rx="36" fill="#111827" opacity="0.95" />
-  <text x="140" y="230" fill="#facc15" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="28" letter-spacing="6">AI PROMO</text>
-  <text x="140" y="330" fill="#f8fafc" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="64" font-weight="600">Fresh AI credits</text>
-  <text x="140" y="400" fill="#f8fafc" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="64" font-weight="600">and freebies</text>
-  <text x="140" y="465" fill="#cbd5f5" font-family="'Manrope', 'Segoe UI', sans-serif" font-size="28">Curated promos, trials, and launch perks in one list.</text>
-  <rect x="140" y="500" width="260" height="48" rx="24" fill="url(#accent)" />
-  <text x="170" y="532" fill="#0b0f1a" font-family="'Manrope', 'Segoe UI', sans-serif" font-size="22" font-weight="700">ai-promo.zainf.dev</text>
+  <circle cx="180" cy="520" r="160" fill="#1f2937" opacity="0.5" />
+  <circle cx="1030" cy="120" r="120" fill="#312e81" opacity="0.42" />
+
+  <rect x="90" y="96" width="1020" height="438" rx="48" fill="url(#card)" stroke="#1f2937" stroke-width="2" />
+
+  <g transform="translate(140 150)">
+    <rect width="140" height="140" rx="36" fill="#0f172a" />
+    <path d="M30 34H92L118 60V112H30Z" fill="url(#tag)" stroke="#0b1020" stroke-width="6" stroke-linejoin="round" />
+    <circle cx="52" cy="60" r="10" fill="#0b1020" opacity="0.9" />
+    <circle cx="52" cy="60" r="5" fill="#f8fafc" />
+    <line x1="50" y1="94" x2="102" y2="42" stroke="#0b1020" stroke-width="10" stroke-linecap="round" />
+    <line x1="50" y1="94" x2="102" y2="42" stroke="#f8fafc" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <text x="320" y="215" fill="#facc15" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="28" letter-spacing="6">AI PROMO</text>
+  <text x="320" y="310" fill="#f8fafc" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="74" font-weight="600">AI Promo</text>
+  <text x="320" y="380" fill="#d1d5f8" font-family="'Manrope', 'Segoe UI', sans-serif" font-size="32">Free AI Promos &amp; Deals</text>
+  <text x="320" y="440" fill="#94a3b8" font-family="'Manrope', 'Segoe UI', sans-serif" font-size="24">Curated credits, trials, and launch perks in one place.</text>
+
+  <rect x="320" y="470" width="270" height="50" rx="25" fill="url(#tag)" />
+  <text x="346" y="503" fill="#0b1020" font-family="'Manrope', 'Segoe UI', sans-serif" font-size="22" font-weight="700">ai-promo.zainf.dev</text>
 </svg>
