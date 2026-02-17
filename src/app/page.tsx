@@ -105,6 +105,21 @@ const getPromoAnchorId = (entry: PromoEntry) => `promo-${entry.id}`;
 const findEntryByAnchorId = (anchorId: string) =>
   promoEntries.find((entry) => getPromoAnchorId(entry) === anchorId) ?? null;
 
+function loadFavoritesFromStorage(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const stored = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+    if (!stored) return new Set();
+    const parsed: unknown = JSON.parse(stored);
+    if (Array.isArray(parsed)) {
+      return new Set(parsed.filter((s): s is string => typeof s === "string"));
+    }
+  } catch (error) {
+    console.warn("Failed to parse saved favorites", error);
+  }
+  return new Set();
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -116,41 +131,10 @@ export default function Home() {
   const [copiedAnchorId, setCopiedAnchorId] = useState<string | null>(null);
   const [activeAnchorId, setActiveAnchorId] = useState<string | null>(null);
   const [highlightedAnchorId, setHighlightedAnchorId] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [favoritesLoaded] = useState(true);
+  const [favorites, setFavorites] = useState<Set<string>>(loadFavoritesFromStorage);
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (typeof window.localStorage?.getItem !== "function") {
-      return;
-    }
-
-    const stored = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
-
-    if (!stored) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(stored);
-
-      if (Array.isArray(parsed)) {
-        setFavorites(new Set(parsed.filter((entry) => typeof entry === "string")));
-      }
-    } catch (error) {
-      console.warn("Failed to parse saved favorites", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!favoritesLoaded) {
-      return;
-    }
-
     if (typeof window === "undefined") {
       return;
     }
@@ -163,7 +147,7 @@ export default function Home() {
       FAVORITES_STORAGE_KEY,
       JSON.stringify(Array.from(favorites)),
     );
-  }, [favorites, favoritesLoaded]);
+  }, [favorites]);
 
   const { activeEntries, expiredEntries, sortedEntries } = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
@@ -414,8 +398,8 @@ export default function Home() {
       ? "Showing 0 of 0 promos"
       : `Showing ${pageStart + 1}-${Math.min(pageEnd, totalVisible)} of ${totalVisible} promos`;
   const favoritesCount = favorites.size;
-  const favoritesCountLabel = favoritesLoaded ? favoritesCount : "";
-  const noFavoritesYet = showFavorites && favoritesLoaded && favoritesCount === 0;
+  const favoritesCountLabel = favoritesCount;
+  const noFavoritesYet = showFavorites && favoritesCount === 0;
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
