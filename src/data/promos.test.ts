@@ -19,7 +19,9 @@ describe("promoEntries data", () => {
     const invalidUrls = promoEntries.filter((entry) => {
       try {
         new URL(entry.url);
-        new URL(entry.sourceUrl);
+        if (entry.sourceUrl) {
+          new URL(entry.sourceUrl);
+        }
         return false;
       } catch {
         return true;
@@ -48,6 +50,20 @@ describe("promoEntries data", () => {
       const parsed = parseIsoDate(entry.addedDate);
 
       return parsed === null || entry.addedDate !== parsed.toISOString().slice(0, 10);
+    });
+
+    expect(invalidDates).toEqual([]);
+  });
+
+  it("uses ISO verified dates when present", () => {
+    const invalidDates = promoEntries.filter((entry) => {
+      if (!entry.verifiedAt) {
+        return false;
+      }
+
+      const parsed = parseIsoDate(entry.verifiedAt);
+
+      return parsed === null || entry.verifiedAt !== parsed.toISOString().slice(0, 10);
     });
 
     expect(invalidDates).toEqual([]);

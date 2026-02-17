@@ -17,6 +17,13 @@ const formatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
+const formatOptionalDate = (value?: string) => {
+  if (!value) return null;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return formatter.format(parsed);
+};
+
 const sortOptions = [
   "Expiring soon",
   "Newest",
@@ -704,6 +711,7 @@ export default function Home() {
                     const anchorId = getPromoAnchorId(entry);
                     const isCopied = copiedAnchorId === anchorId;
                     const isHighlighted = highlightedAnchorId === anchorId;
+                    const verifiedLabel = formatOptionalDate(entry.verifiedAt);
 
                     return (
                       <article
@@ -728,6 +736,11 @@ export default function Home() {
                             <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
                               Active
                             </span>
+                            {verifiedLabel && (
+                              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
+                                Verified {verifiedLabel}
+                              </span>
+                            )}
                             <div className="flex flex-wrap items-center gap-2">
                               <button
                                 className={`inline-flex items-center justify-center rounded-full border px-2 py-2 transition ${
@@ -763,16 +776,21 @@ export default function Home() {
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {entry.tags.map((tag) => (
-                          <span
-                            key={`${entry.id}-${tag}`}
-                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
-                          >
-                            {tag.replace(/-/g, " ")}
-                          </span>
-                        ))}
-                      </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {entry.tags.map((tag) => (
+                            <span
+                              key={`${entry.id}-${tag}`}
+                              className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
+                            >
+                              {tag.replace(/-/g, " ")}
+                            </span>
+                          ))}
+                          {entry.submittedBy && (
+                            <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                              Submitted by {entry.submittedBy}
+                            </span>
+                          )}
+                        </div>
                         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
@@ -783,6 +801,18 @@ export default function Home() {
                                 ? "Ongoing"
                                 : formatter.format(new Date(entry.expiryDate))}
                             </p>
+                            {entry.sourceUrl && (
+                              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                                <a
+                                  className="transition hover:text-[var(--ink)]"
+                                  href={entry.sourceUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Source
+                                </a>
+                              </p>
+                            )}
                           </div>
                           <a
                             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--accent)]/60 group-hover:text-[var(--accent-strong)] sm:w-auto"
@@ -811,6 +841,7 @@ export default function Home() {
                     const anchorId = getPromoAnchorId(entry);
                     const isCopied = copiedAnchorId === anchorId;
                     const isHighlighted = highlightedAnchorId === anchorId;
+                    const verifiedLabel = formatOptionalDate(entry.verifiedAt);
 
                     return (
                       <article
@@ -835,6 +866,11 @@ export default function Home() {
                             <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
                               Expired
                             </span>
+                            {verifiedLabel && (
+                              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
+                                Verified {verifiedLabel}
+                              </span>
+                            )}
                             <div className="flex flex-wrap items-center gap-2">
                               <button
                                 className={`inline-flex items-center justify-center rounded-full border px-2 py-2 transition ${
@@ -870,16 +906,21 @@ export default function Home() {
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {entry.tags.map((tag) => (
-                          <span
-                            key={`${entry.id}-${tag}`}
-                            className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
-                          >
-                            {tag.replace(/-/g, " ")}
-                          </span>
-                        ))}
-                      </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {entry.tags.map((tag) => (
+                            <span
+                              key={`${entry.id}-${tag}`}
+                              className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
+                            >
+                              {tag.replace(/-/g, " ")}
+                            </span>
+                          ))}
+                          {entry.submittedBy && (
+                            <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                              Submitted by {entry.submittedBy}
+                            </span>
+                          )}
+                        </div>
                         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">
@@ -888,6 +929,18 @@ export default function Home() {
                             <p className="text-sm font-medium text-[var(--ink)]">
                               {formatter.format(new Date(entry.expiryDate))}
                             </p>
+                            {entry.sourceUrl && (
+                              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                                <a
+                                  className="transition hover:text-[var(--ink)]"
+                                  href={entry.sourceUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Source
+                                </a>
+                              </p>
+                            )}
                           </div>
                           <a
                             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--muted)] transition group-hover:text-[var(--ink)] sm:w-auto"
