@@ -175,7 +175,8 @@ export const promoEntries: PromoEntry[] = [
     expiryDate: "Ongoing",
     addedDate: "2026-02-17",
     source: "Antigravity pricing",
-    sourceUrl: "https://antigravity.google/pricing",
+    sourceUrl: "https://github.com/zainfathoni/ai-promo/issues/30",
+    submittedBy: "ivankristianto",
   },
   {
     id: "openrouter-starter-credits",
