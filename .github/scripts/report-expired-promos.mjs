@@ -63,7 +63,6 @@ const createIssueResponse = await fetch(
     body: JSON.stringify({
       title: issueTitle,
       body: issueBody,
-      labels: ["maintenance"],
     }),
   },
 );
