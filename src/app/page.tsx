@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
-import { RefreshIcon } from "@/components/icons";
+import { HeartIcon, RefreshIcon } from "@/components/icons";
 import { PromoStructuredData } from "@/components/promo-structured-data";
 import { siteMetadata } from "@/lib/site";
 
@@ -25,6 +25,7 @@ const sortOptions = [
 ] as const;
 
 const ITEMS_PER_PAGE = 12;
+const FAVORITES_STORAGE_KEY = "ai-promo:favorites";
 
 type SortOption = (typeof sortOptions)[number];
 
@@ -109,12 +110,60 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [showExpired, setShowExpired] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedAnchorId, setCopiedAnchorId] = useState<string | null>(null);
   const [activeAnchorId, setActiveAnchorId] = useState<string | null>(null);
   const [highlightedAnchorId, setHighlightedAnchorId] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favoritesLoaded] = useState(true);
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (typeof window.localStorage?.getItem !== "function") {
+      return;
+    }
+
+    const stored = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+
+    if (!stored) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+
+      if (Array.isArray(parsed)) {
+        setFavorites(new Set(parsed.filter((entry) => typeof entry === "string")));
+      }
+    } catch (error) {
+      console.warn("Failed to parse saved favorites", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!favoritesLoaded) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (typeof window.localStorage?.setItem !== "function") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify(Array.from(favorites)),
+    );
+  }, [favorites, favoritesLoaded]);
 
   const { activeEntries, expiredEntries, sortedEntries } = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
@@ -125,6 +174,7 @@ export default function Home() {
       const matchesTags =
         selectedTags.size === 0 ||
         Array.from(selectedTags).every((tag) => entry.tags.includes(tag as PromoTag));
+      const matchesFavorites = !showFavorites || favorites.has(entry.id);
       const matchesSearch =
         normalized.length === 0 ||
         entry.title.toLowerCase().includes(normalized) ||
@@ -132,7 +182,7 @@ export default function Home() {
         entry.category.toLowerCase().includes(normalized) ||
         entry.tags.some((tag) => tag.toLowerCase().includes(normalized));
 
-      return matchesCategory && matchesTags && matchesSearch;
+      return matchesCategory && matchesTags && matchesFavorites && matchesSearch;
     });
 
     const sorted = sortEntries(filtered, sortBy);
@@ -140,7 +190,7 @@ export default function Home() {
     const expired = sorted.filter((entry) => !isActivePromo(entry.expiryDate));
 
     return { activeEntries: active, expiredEntries: expired, sortedEntries: sorted };
-  }, [searchTerm, selectedCategory, selectedTags, sortBy]);
+  }, [favorites, searchTerm, selectedCategory, selectedTags, showFavorites, sortBy]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -316,6 +366,20 @@ export default function Home() {
     resetPagination();
   };
 
+  const toggleFavorite = (promoId: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(promoId)) {
+        next.delete(promoId);
+      } else {
+        next.add(promoId);
+      }
+
+      return next;
+    });
+  };
+
   const handleCopyLink = async (entry: PromoEntry) => {
     if (typeof window === "undefined") {
       return;
@@ -349,6 +413,9 @@ export default function Home() {
     totalVisible === 0
       ? "Showing 0 of 0 promos"
       : `Showing ${pageStart + 1}-${Math.min(pageEnd, totalVisible)} of ${totalVisible} promos`;
+  const favoritesCount = favorites.size;
+  const favoritesCountLabel = favoritesLoaded ? favoritesCount : "";
+  const noFavoritesYet = showFavorites && favoritesLoaded && favoritesCount === 0;
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
@@ -544,7 +611,25 @@ export default function Home() {
             {pageSummary}
           </span>
           <div className="flex flex-wrap items-center gap-4">
-            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired || selectedTags.size > 0) && (
+            <button
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 ${
+                showFavorites
+                  ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                  : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+              }`}
+              type="button"
+              onClick={() => {
+                setShowFavorites((prev) => !prev);
+                resetPagination();
+              }}
+            >
+              <HeartIcon filled={showFavorites} />
+              <span>My favorites</span>
+              <span className="rounded-full bg-[var(--muted-bg)] px-2 py-0.5 text-[0.6rem] font-semibold text-[var(--accent-strong)]">
+                {favoritesCountLabel}
+              </span>
+            </button>
+            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired || selectedTags.size > 0 || showFavorites) && (
               <button
                 aria-label="Reset all filters to default"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-4 py-2.5 font-medium text-[var(--accent-strong)] shadow-sm transition-all duration-200 hover:bg-[var(--muted-bg)] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 active:translate-y-0"
@@ -554,6 +639,7 @@ export default function Home() {
                   setSelectedCategory("All");
                   setSortBy("Newest");
                   setShowExpired(false);
+                  setShowFavorites(false);
                   resetPagination();
                   clearTags();
                 }}
@@ -614,10 +700,12 @@ export default function Home() {
         {activeEntries.length === 0 && expiredEntries.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-8 text-center text-[var(--muted)] sm:p-10">
             <p className="text-base font-semibold text-[var(--ink)] sm:text-lg">
-              No promos match your search.
+              {noFavoritesYet ? "No favorites yet." : "No promos match your search."}
             </p>
             <p className="mt-2">
-              Try a different keyword or reset the category filter.
+              {noFavoritesYet
+                ? "Tap the heart on a promo to save it here."
+                : "Try a different keyword or reset the category filter."}
             </p>
           </div>
         ) : (
@@ -656,17 +744,36 @@ export default function Home() {
                             <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
                               Active
                             </span>
-                            <button
-                              className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
-                                isCopied
-                                  ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
-                                  : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
-                              }`}
-                              type="button"
-                              onClick={() => handleCopyLink(entry)}
-                            >
-                              {isCopied ? "Copied!" : "Copy link"}
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                className={`inline-flex items-center justify-center rounded-full border px-2 py-2 transition ${
+                                  favorites.has(entry.id)
+                                    ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                    : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                                }`}
+                                type="button"
+                                onClick={() => toggleFavorite(entry.id)}
+                                aria-pressed={favorites.has(entry.id)}
+                                aria-label={
+                                  favorites.has(entry.id)
+                                    ? `Remove ${entry.title} from favorites`
+                                    : `Save ${entry.title} to favorites`
+                                }
+                              >
+                                <HeartIcon filled={favorites.has(entry.id)} />
+                              </button>
+                              <button
+                                className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
+                                  isCopied
+                                    ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                    : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                                }`}
+                                type="button"
+                                onClick={() => handleCopyLink(entry)}
+                              >
+                                {isCopied ? "Copied!" : "Copy link"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
@@ -744,17 +851,36 @@ export default function Home() {
                             <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
                               Expired
                             </span>
-                            <button
-                              className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
-                                isCopied
-                                  ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
-                                  : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
-                              }`}
-                              type="button"
-                              onClick={() => handleCopyLink(entry)}
-                            >
-                              {isCopied ? "Copied!" : "Copy link"}
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                className={`inline-flex items-center justify-center rounded-full border px-2 py-2 transition ${
+                                  favorites.has(entry.id)
+                                    ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                    : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                                }`}
+                                type="button"
+                                onClick={() => toggleFavorite(entry.id)}
+                                aria-pressed={favorites.has(entry.id)}
+                                aria-label={
+                                  favorites.has(entry.id)
+                                    ? `Remove ${entry.title} from favorites`
+                                    : `Save ${entry.title} to favorites`
+                                }
+                              >
+                                <HeartIcon filled={favorites.has(entry.id)} />
+                              </button>
+                              <button
+                                className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
+                                  isCopied
+                                    ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                    : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                                }`}
+                                type="button"
+                                onClick={() => handleCopyLink(entry)}
+                              >
+                                {isCopied ? "Copied!" : "Copy link"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
