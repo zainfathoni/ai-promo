@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 import { RefreshIcon } from "@/components/icons";
 import { PromoStructuredData } from "@/components/promo-structured-data";
+import { siteMetadata } from "@/lib/site";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
 const tagFilters = ["All", ...promoTagOptions];
@@ -98,6 +99,11 @@ const sortEntries = (entries: PromoEntry[], sortBy: SortOption) => {
   }
 };
 
+const getPromoAnchorId = (entry: PromoEntry) => `promo-${entry.id}`;
+
+const findEntryByAnchorId = (anchorId: string) =>
+  promoEntries.find((entry) => getPromoAnchorId(entry) === anchorId) ?? null;
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -105,6 +111,9 @@ export default function Home() {
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [copiedAnchorId, setCopiedAnchorId] = useState<string | null>(null);
+  const [activeAnchorId, setActiveAnchorId] = useState<string | null>(null);
+  const [highlightedAnchorId, setHighlightedAnchorId] = useState<string | null>(null);
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
   const { activeEntries, expiredEntries, sortedEntries } = useMemo(() => {
@@ -133,6 +142,25 @@ export default function Home() {
     return { activeEntries: active, expiredEntries: expired, sortedEntries: sorted };
   }, [searchTerm, selectedCategory, selectedTags, sortBy]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleHashChange = () => {
+      const rawHash = window.location.hash.replace("#", "");
+      const nextAnchor = rawHash ? decodeURIComponent(rawHash) : null;
+      setActiveAnchorId(nextAnchor);
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
   const visibleEntries = showExpired ? sortedEntries : activeEntries;
   const totalVisible = visibleEntries.length;
   const totalPages = Math.max(1, Math.ceil(totalVisible / ITEMS_PER_PAGE));
@@ -143,6 +171,127 @@ export default function Home() {
   const pagedEntries = visibleEntries.slice(pageStart, pageEnd);
   const pagedActiveEntries = pagedEntries.filter((entry) => isActivePromo(entry.expiryDate));
   const pagedExpiredEntries = pagedEntries.filter((entry) => !isActivePromo(entry.expiryDate));
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const scheduleUpdate = (update: () => void) => {
+      window.setTimeout(update, 0);
+    };
+
+    if (!activeAnchorId) {
+      scheduleUpdate(() => setHighlightedAnchorId(null));
+      return;
+    }
+
+    const entry = findEntryByAnchorId(activeAnchorId);
+
+    if (!entry) {
+      scheduleUpdate(() => setHighlightedAnchorId(null));
+      return;
+    }
+
+    if (!showExpired && !isActivePromo(entry.expiryDate)) {
+      scheduleUpdate(() => setShowExpired(true));
+      return;
+    }
+
+    const entryIndex = visibleEntries.findIndex((item) => item.id === entry.id);
+
+    if (entryIndex === -1) {
+      scheduleUpdate(() => setHighlightedAnchorId(null));
+      return;
+    }
+
+    const nextPage = Math.max(1, Math.ceil((entryIndex + 1) / ITEMS_PER_PAGE));
+
+    if (nextPage !== currentPage) {
+      scheduleUpdate(() => setCurrentPage(nextPage));
+    }
+  }, [activeAnchorId, visibleEntries, currentPage, showExpired]);
+
+  useEffect(() => {
+    if (!activeAnchorId) {
+      return;
+    }
+
+    const scrollToAnchor = () => {
+      const element = document.getElementById(activeAnchorId);
+
+      if (!element) {
+        return;
+      }
+
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedAnchorId(activeAnchorId);
+    };
+
+    const timeout = window.setTimeout(scrollToAnchor, 120);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [activeAnchorId, pagedEntries]);
+
+  useEffect(() => {
+    if (!highlightedAnchorId) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setHighlightedAnchorId(null);
+    }, 2200);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [highlightedAnchorId]);
+
+  useEffect(() => {
+    if (!activeAnchorId) {
+      return;
+    }
+
+    const entry = findEntryByAnchorId(activeAnchorId);
+
+    if (!entry) {
+      return;
+    }
+
+    document.title = `${entry.title} | ${siteMetadata.title}`;
+
+    const ensureMetaTag = (property: string, content: string) => {
+      const selector = `meta[property="${property}"]`;
+      let tag = document.querySelector(selector) as HTMLMetaElement | null;
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("property", property);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    };
+
+    ensureMetaTag("og:title", entry.title);
+    ensureMetaTag("og:description", entry.description);
+
+    return () => {
+      document.title = siteMetadata.title;
+      const ogTitle = document.querySelector("meta[property='og:title']");
+      const ogDescription = document.querySelector("meta[property='og:description']");
+
+      if (ogTitle) {
+        ogTitle.setAttribute("content", siteMetadata.title);
+      }
+
+      if (ogDescription) {
+        ogDescription.setAttribute("content", siteMetadata.description);
+      }
+    };
+  }, [activeAnchorId]);
 
   const resetPagination = () => {
     setCurrentPage(1);
@@ -165,6 +314,35 @@ export default function Home() {
   const clearTags = () => {
     setSelectedTags(new Set());
     resetPagination();
+  };
+
+  const handleCopyLink = async (entry: PromoEntry) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const anchorId = getPromoAnchorId(entry);
+    const url = `${window.location.origin}${window.location.pathname}#${encodeURIComponent(anchorId)}`;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const tempInput = document.createElement("input");
+        tempInput.value = url;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        tempInput.remove();
+      }
+
+      setCopiedAnchorId(anchorId);
+      window.setTimeout(() => {
+        setCopiedAnchorId((current) => (current === anchorId ? null : current));
+      }, 1800);
+    } catch (error) {
+      console.error("Failed to copy promo link", error);
+    }
   };
 
   const pageSummary =
@@ -450,24 +628,47 @@ export default function Home() {
                   Active Promos ({activeEntries.length})
                 </h2>
                 <div className="grid gap-6 md:grid-cols-2">
-                  {pagedActiveEntries.map((entry) => (
-                    <article
-                      key={entry.id}
-                      className="group flex h-full flex-col justify-between rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:-translate-y-1 hover:border-[var(--accent)]/60 hover:shadow-[0_24px_45px_-28px_rgba(249,164,90,0.35)] animate-rise"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
-                            {entry.category}
-                          </p>
-                          <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
-                            {entry.title}
-                          </h3>
+                  {pagedActiveEntries.map((entry) => {
+                    const anchorId = getPromoAnchorId(entry);
+                    const isCopied = copiedAnchorId === anchorId;
+                    const isHighlighted = highlightedAnchorId === anchorId;
+
+                    return (
+                      <article
+                        key={entry.id}
+                        id={anchorId}
+                        className={`group flex h-full flex-col justify-between rounded-3xl border bg-[var(--surface)] p-6 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:-translate-y-1 hover:border-[var(--accent)]/60 hover:shadow-[0_24px_45px_-28px_rgba(249,164,90,0.35)] animate-rise ${
+                          isHighlighted
+                            ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/40"
+                            : "border-[var(--border-subtle)]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
+                              {entry.category}
+                            </p>
+                            <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
+                              {entry.title}
+                            </h3>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
+                              Active
+                            </span>
+                            <button
+                              className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
+                                isCopied
+                                  ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                  : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                              }`}
+                              type="button"
+                              onClick={() => handleCopyLink(entry)}
+                            >
+                              {isCopied ? "Copied!" : "Copy link"}
+                            </button>
+                          </div>
                         </div>
-                        <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
-                          Active
-                        </span>
-                      </div>
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
@@ -481,29 +682,30 @@ export default function Home() {
                           </span>
                         ))}
                       </div>
-                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
-                            {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
-                          </p>
-                          <p className="text-sm font-medium text-[var(--ink)]">
-                            {entry.expiryDate === "Ongoing"
-                              ? "Ongoing"
-                              : formatter.format(new Date(entry.expiryDate))}
-                          </p>
+                        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
+                              {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
+                            </p>
+                            <p className="text-sm font-medium text-[var(--ink)]">
+                              {entry.expiryDate === "Ongoing"
+                                ? "Ongoing"
+                                : formatter.format(new Date(entry.expiryDate))}
+                            </p>
+                          </div>
+                          <a
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--accent)]/60 group-hover:text-[var(--accent-strong)] sm:w-auto"
+                            href={entry.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Visit offer
+                            <span aria-hidden>→</span>
+                          </a>
                         </div>
-                        <a
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--accent)]/60 group-hover:text-[var(--accent-strong)] sm:w-auto"
-                          href={entry.url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Visit offer
-                          <span aria-hidden>→</span>
-                        </a>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -514,24 +716,47 @@ export default function Home() {
                   Expired Promos ({expiredEntries.length})
                 </h2>
                 <div className="grid gap-6 md:grid-cols-2">
-                  {pagedExpiredEntries.map((entry) => (
-                    <article
-                      key={entry.id}
-                      className="group flex h-full flex-col justify-between rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 opacity-60 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:opacity-80 animate-rise"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-xs sm:tracking-[0.3em]">
-                            {entry.category}
-                          </p>
-                          <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
-                            {entry.title}
-                          </h3>
+                  {pagedExpiredEntries.map((entry) => {
+                    const anchorId = getPromoAnchorId(entry);
+                    const isCopied = copiedAnchorId === anchorId;
+                    const isHighlighted = highlightedAnchorId === anchorId;
+
+                    return (
+                      <article
+                        key={entry.id}
+                        id={anchorId}
+                        className={`group flex h-full flex-col justify-between rounded-3xl border bg-[var(--surface)] p-6 opacity-60 shadow-[0_20px_40px_-30px_var(--shadow-color)] transition hover:opacity-80 animate-rise ${
+                          isHighlighted
+                            ? "border-[var(--accent)] ring-2 ring-[var(--accent)]/40"
+                            : "border-[var(--border-subtle)]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-xs sm:tracking-[0.3em]">
+                              {entry.category}
+                            </p>
+                            <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
+                              {entry.title}
+                            </h3>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
+                              Expired
+                            </span>
+                            <button
+                              className={`rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition ${
+                                isCopied
+                                  ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
+                                  : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
+                              }`}
+                              type="button"
+                              onClick={() => handleCopyLink(entry)}
+                            >
+                              {isCopied ? "Copied!" : "Copy link"}
+                            </button>
+                          </div>
                         </div>
-                        <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
-                          Expired
-                        </span>
-                      </div>
                       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
                         {entry.description}
                       </p>
@@ -545,27 +770,28 @@ export default function Home() {
                           </span>
                         ))}
                       </div>
-                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">
-                            Expired
-                          </p>
-                          <p className="text-sm font-medium text-[var(--ink)]">
-                            {formatter.format(new Date(entry.expiryDate))}
-                          </p>
+                        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">
+                              Expired
+                            </p>
+                            <p className="text-sm font-medium text-[var(--ink)]">
+                              {formatter.format(new Date(entry.expiryDate))}
+                            </p>
+                          </div>
+                          <a
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--muted)] transition group-hover:text-[var(--ink)] sm:w-auto"
+                            href={entry.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View offer
+                            <span aria-hidden>→</span>
+                          </a>
                         </div>
-                        <a
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-sm font-semibold text-[var(--muted)] transition group-hover:text-[var(--ink)] sm:w-auto"
-                          href={entry.url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          View offer
-                          <span aria-hidden>→</span>
-                        </a>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             )}
