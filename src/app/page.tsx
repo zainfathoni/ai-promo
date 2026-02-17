@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { promoEntries, promoTagOptions, type PromoEntry, type PromoTag } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 import { RefreshIcon } from "@/components/icons";
 import { PromoStructuredData } from "@/components/promo-structured-data";
-import { siteMetadata } from "@/lib/site";
 
 const categories = ["All", ...new Set(promoEntries.map((entry) => entry.category))];
 const tagFilters = ["All", ...promoTagOptions];
@@ -98,11 +97,6 @@ const sortEntries = (entries: PromoEntry[], sortBy: SortOption) => {
       return sorted.sort(compareNewest);
   }
 };
-
-const getPromoAnchorId = (entry: PromoEntry) => `promo-${entry.id}`;
-
-const findEntryByAnchorId = (anchorId: string) =>
-  promoEntries.find((entry) => getPromoAnchorId(entry) === anchorId) ?? null;
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
