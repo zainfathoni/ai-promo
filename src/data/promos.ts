@@ -401,6 +401,20 @@ export const promoEntries: PromoEntry[] = [
     sourceUrl: "https://aws.amazon.com/activate/",
   },
   {
+    id: "ollama-free-tier",
+    title: "Ollama Free Tier",
+    description:
+      "Free tier includes light usage for chat, quick questions, and trying out models. Currently minimax-m2.5:cloud and glm5:cloud are free to use with rate limit. Ollama can integrate with coding apps.",
+    category: "Models",
+    tags: ["free-tier"],
+    url: "https://ollama.com/pricing",
+    expiryDate: "Ongoing",
+    addedDate: "2026-02-18",
+    source: "Ollama",
+    sourceUrl: "https://ollama.com/pricing",
+    submittedBy: "ivankristianto",
+  },
+  {
     id: "microsoft-for-startups-founders-hub",
     title: "Microsoft for Startups Founders Hub",
     description:
