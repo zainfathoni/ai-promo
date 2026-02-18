@@ -1,10 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { NextIntlClientProvider } from "next-intl";
 
-import Home from "@/app/page";
+import Home from "@/app/[locale]/page";
 import { promoEntries } from "@/data/promos";
 import { ThemeProvider } from "@/app/theme-provider";
+import enMessages from "../../messages/en.json";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+}));
 
 const newestPromoTitle = [...promoEntries]
   .sort((a, b) => {
@@ -24,21 +30,23 @@ if (!newestPromoTitle) {
 
 const renderHome = () =>
   render(
-    <ThemeProvider>
-      <Home />
-    </ThemeProvider>,
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <ThemeProvider>
+        <Home />
+      </ThemeProvider>
+    </NextIntlClientProvider>,
   );
 
 describe("Home page", () => {
   it("renders the promo list and search controls", () => {
     renderHome();
 
-    expect(screen.getByText("Curated AI promos")).toBeInTheDocument();
-    expect(screen.getByLabelText("Search promos")).toBeInTheDocument();
-    expect(screen.getByLabelText("Category")).toBeInTheDocument();
-    expect(screen.getByLabelText("Sort by")).toBeInTheDocument();
-    expect(screen.getByText("Tag filters")).toBeInTheDocument();
-    expect(screen.getAllByText("Visit offer")).toHaveLength(
+    expect(screen.getByText(enMessages.header.badge)).toBeInTheDocument();
+    expect(screen.getByLabelText(enMessages.filters.searchLabel)).toBeInTheDocument();
+    expect(screen.getByLabelText(enMessages.filters.category)).toBeInTheDocument();
+    expect(screen.getByLabelText(enMessages.filters.sortBy)).toBeInTheDocument();
+    expect(screen.getByText(enMessages.filters.tagFilters)).toBeInTheDocument();
+    expect(screen.getAllByText(enMessages.cards.visitOffer)).toHaveLength(
       Math.min(12, promoEntries.length),
     );
   });
@@ -47,7 +55,7 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.type(screen.getByLabelText("Search promos"), "Gemini");
+    await user.type(screen.getByLabelText(enMessages.filters.searchLabel), "Gemini");
 
     expect(screen.getByText("Gemini API Free Tier")).toBeInTheDocument();
     expect(screen.queryByText("ElevenLabs Free Plan")).not.toBeInTheDocument();
@@ -57,7 +65,7 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.selectOptions(screen.getByLabelText("Category"), "Design");
+    await user.selectOptions(screen.getByLabelText(enMessages.filters.category), "Design");
 
     expect(screen.getByText("Stability AI API Free Credits")).toBeInTheDocument();
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
@@ -67,7 +75,7 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.click(screen.getByRole("button", { name: "credits" }));
+    await user.click(screen.getByRole("button", { name: enMessages.tags.credits }));
 
     expect(screen.getByText("Deepgram $200 Free Credit")).toBeInTheDocument();
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
@@ -78,13 +86,13 @@ describe("Home page", () => {
     renderHome();
 
     expect(
-      screen.queryByRole("button", { name: "Reset all filters to default" }),
+      screen.queryByRole("button", { name: enMessages.filters.resetFiltersAria }),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "credits" }));
+    await user.click(screen.getByRole("button", { name: enMessages.tags.credits }));
 
     const resetButton = screen.getByRole("button", {
-      name: "Reset all filters to default",
+      name: enMessages.filters.resetFiltersAria,
     });
     expect(resetButton).toBeInTheDocument();
     expect(screen.queryByText("Gemini API Free Tier")).not.toBeInTheDocument();
@@ -98,21 +106,24 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.type(screen.getByLabelText("Search promos"), "Gemini");
-    await user.selectOptions(screen.getByLabelText("Category"), "Models");
-    await user.selectOptions(screen.getByLabelText("Sort by"), "Alphabetical");
-    await user.click(screen.getByRole("button", { name: "credits" }));
+    await user.type(screen.getByLabelText(enMessages.filters.searchLabel), "Gemini");
+    await user.selectOptions(screen.getByLabelText(enMessages.filters.category), "Models");
+    await user.selectOptions(
+      screen.getByLabelText(enMessages.filters.sortBy),
+      "Alphabetical",
+    );
+    await user.click(screen.getByRole("button", { name: enMessages.tags.credits }));
 
     const resetButton = screen.getByRole("button", {
-      name: "Reset all filters to default",
+      name: enMessages.filters.resetFiltersAria,
     });
 
     await user.click(resetButton);
 
-    expect(screen.getByLabelText("Search promos")).toHaveValue("");
-    expect(screen.getByLabelText("Category")).toHaveValue("All");
-    expect(screen.getByLabelText("Sort by")).toHaveValue("Newest");
-    expect(screen.getByRole("button", { name: "All" })).toHaveClass(
+    expect(screen.getByLabelText(enMessages.filters.searchLabel)).toHaveValue("");
+    expect(screen.getByLabelText(enMessages.filters.category)).toHaveValue("All");
+    expect(screen.getByLabelText(enMessages.filters.sortBy)).toHaveValue("Newest");
+    expect(screen.getByRole("button", { name: enMessages.filters.all })).toHaveClass(
       "border-[var(--accent)]",
     );
     expect(screen.getByText(newestPromoTitle)).toBeInTheDocument();
@@ -122,9 +133,12 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.selectOptions(screen.getByLabelText("Sort by"), "Alphabetical");
+    await user.selectOptions(
+      screen.getByLabelText(enMessages.filters.sortBy),
+      "Alphabetical",
+    );
 
-    const visitButtons = screen.getAllByText("Visit offer");
+    const visitButtons = screen.getAllByText(enMessages.cards.visitOffer);
     const titles = visitButtons.map((button) =>
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
@@ -143,9 +157,9 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.selectOptions(screen.getByLabelText("Sort by"), "Newest");
+    await user.selectOptions(screen.getByLabelText(enMessages.filters.sortBy), "Newest");
 
-    const visitButtons = screen.getAllByText("Visit offer");
+    const visitButtons = screen.getAllByText(enMessages.cards.visitOffer);
     const titles = visitButtons.map((button) =>
       button.closest("article")?.querySelector("h3")?.textContent?.trim(),
     );
@@ -170,16 +184,16 @@ describe("Home page", () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.type(screen.getByLabelText("Search promos"), "NoMatch");
+    await user.type(screen.getByLabelText(enMessages.filters.searchLabel), "NoMatch");
 
-    expect(screen.getByText("No promos match your search.")).toBeInTheDocument();
+    expect(screen.getByText(enMessages.empty.noMatch)).toBeInTheDocument();
   });
 
   it("lets visitors change the theme", async () => {
     const user = userEvent.setup();
     renderHome();
 
-    await user.click(screen.getByRole("button", { name: "dark" }));
+    await user.click(screen.getByRole("button", { name: enMessages.header.theme.dark }));
 
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(document.documentElement.style.colorScheme).toBe("dark");

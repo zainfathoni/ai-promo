@@ -1,0 +1,102 @@
+{
+  "header": {
+    "badge": "Curated AI promos",
+    "offersTracked": "{count, plural, one {# offer tracked} other {# offers tracked}}",
+    "updatedWeekly": "Updated weekly",
+    "title": "ai-promo keeps every AI freebie, credit, and launch perk in one place.",
+    "subtitle": "Discover fresh credits, trials, and bundles from top AI tooling partners.",
+    "subtitleContinuation": "Search the catalog or filter by category to plan your next build.",
+    "quickActions": "Quick actions",
+    "submitPromo": "Submit a promo entry",
+    "openPromoPr": "Open a promo PR",
+    "themeLabel": "Theme",
+    "theme": {
+      "system": "system",
+      "light": "light",
+      "dark": "dark"
+    },
+    "switchToLight": "Switch to light",
+    "switchToDark": "Switch to dark"
+  },
+  "filters": {
+    "searchLabel": "Search promos",
+    "searchPlaceholder": "Search by name, category, or keyword",
+    "category": "Category",
+    "sortBy": "Sort by",
+    "tagFilters": "Tag filters",
+    "clearTags": "Clear tags",
+    "favorites": "My favorites",
+    "resetFilters": "Reset filters",
+    "resetFiltersAria": "Reset all filters to default",
+    "showExpired": "Show {count, plural, one {# expired promo} other {# expired promos}}",
+    "all": "All"
+  },
+  "sort": {
+    "expiringSoon": "Expiring soon",
+    "newest": "Newest",
+    "alphabetical": "Alphabetical",
+    "category": "Category"
+  },
+  "categories": {
+    "models": "Models",
+    "design": "Design",
+    "hosting": "Hosting",
+    "productivity": "Productivity",
+    "developerTools": "Developer Tools",
+    "analytics": "Analytics",
+    "education": "Education",
+    "infrastructure": "Infrastructure",
+    "data": "Data",
+    "security": "Security",
+    "openSource": "Open Source",
+    "startupPrograms": "Startup Programs"
+  },
+  "tags": {
+    "freeTier": "Free tier",
+    "credits": "Credits",
+    "trial": "Trial",
+    "startupOnly": "Startup only",
+    "student": "Student",
+    "openSource": "Open source"
+  },
+  "pagination": {
+    "none": "Showing 0 of 0 promos",
+    "summary": "Showing {start}-{end} of {total} promos",
+    "page": "Page {current} of {total}",
+    "prev": "Prev",
+    "next": "Next",
+    "previousAria": "Go to previous page",
+    "nextAria": "Go to next page",
+    "aria": "Promo pagination"
+  },
+  "empty": {
+    "noFavorites": "No favorites yet.",
+    "noMatch": "No promos match your search.",
+    "noFavoritesHint": "Tap the heart on a promo to save it here.",
+    "noMatchHint": "Try a different keyword or reset the category filter."
+  },
+  "sections": {
+    "active": "Active Promos ({count})",
+    "expired": "Expired Promos ({count})"
+  },
+  "badges": {
+    "active": "Active",
+    "expired": "Expired",
+    "verified": "Verified {date}",
+    "copied": "Copied!",
+    "copyLink": "Copy link"
+  },
+  "favorites": {
+    "remove": "Remove {title} from favorites",
+    "add": "Save {title} to favorites"
+  },
+  "cards": {
+    "submittedBy": "Submitted by {name}",
+    "availability": "Availability",
+    "expires": "Expires",
+    "ongoing": "Ongoing",
+    "source": "Source",
+    "visitOffer": "Visit offer",
+    "viewOffer": "View offer"
+  }
+}

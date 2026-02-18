@@ -1,34 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   promoCategoryOptions,
   promoEntries,
   promoTagOptions,
+  type PromoCategory,
   type PromoEntry,
   type PromoTag,
 } from "@/data/promos";
 import { useTheme } from "@/app/theme-provider";
 import { HeartIcon, RefreshIcon } from "@/components/icons";
 import { PromoStructuredData } from "@/components/promo-structured-data";
+import { defaultLocale, locales } from "@/i18n/config";
 import { siteMetadata } from "@/lib/site";
-
-const categories = ["All", ...promoCategoryOptions];
-const tagFilters = ["All", ...promoTagOptions];
-
-const formatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-});
-
-const formatOptionalDate = (value?: string) => {
-  if (!value) return null;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return formatter.format(parsed);
-};
 
 const sortOptions = [
   "Expiring soon",
@@ -36,6 +24,30 @@ const sortOptions = [
   "Alphabetical",
   "Category",
 ] as const;
+
+const categoryKeyMap: Record<PromoCategory, string> = {
+  Models: "models",
+  Design: "design",
+  Hosting: "hosting",
+  Productivity: "productivity",
+  "Developer Tools": "developerTools",
+  Analytics: "analytics",
+  Education: "education",
+  Infrastructure: "infrastructure",
+  Data: "data",
+  Security: "security",
+  "Open Source": "openSource",
+  "Startup Programs": "startupPrograms",
+};
+
+const tagKeyMap: Record<PromoTag, string> = {
+  "free-tier": "freeTier",
+  credits: "credits",
+  trial: "trial",
+  "startup-only": "startupOnly",
+  student: "student",
+  "open-source": "openSource",
+};
 
 const ITEMS_PER_PAGE = 12;
 const FAVORITES_STORAGE_KEY = "ai-promo:favorites";
@@ -134,6 +146,8 @@ function loadFavoritesFromStorage(): Set<string> {
 }
 
 export default function Home() {
+  const t = useTranslations();
+  const locale = useLocale();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -146,6 +160,74 @@ export default function Home() {
   const [highlightedAnchorId, setHighlightedAnchorId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(loadFavoritesFromStorage);
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+
+  const dateLocale = locale === "en" ? "en-US" : "id-ID";
+  const formatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(dateLocale, {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
+    [dateLocale],
+  );
+
+  const formatOptionalDate = (value?: string) => {
+    if (!value) return null;
+    const parsed = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return formatter.format(parsed);
+  };
+
+  const categoryOptions = [
+    { value: "All", label: t("filters.all") },
+    ...promoCategoryOptions.map((category) => ({
+      value: category,
+      label: t(`categories.${categoryKeyMap[category]}`),
+    })),
+  ];
+
+  const tagOptions = [
+    { value: "All", label: t("filters.all") },
+    ...promoTagOptions.map((tag) => ({
+      value: tag,
+      label: t(`tags.${tagKeyMap[tag]}`),
+    })),
+  ];
+
+  const sortOptionLabels: Record<SortOption, string> = {
+    "Expiring soon": t("sort.expiringSoon"),
+    "Newest": t("sort.newest"),
+    "Alphabetical": t("sort.alphabetical"),
+    "Category": t("sort.category"),
+  };
+
+  const categoryLabels = promoCategoryOptions.reduce<Record<PromoCategory, string>>(
+    (acc, category) => {
+      acc[category] = t(`categories.${categoryKeyMap[category]}`);
+      return acc;
+    },
+    {} as Record<PromoCategory, string>,
+  );
+
+  const tagLabels = promoTagOptions.reduce<Record<PromoTag, string>>(
+    (acc, tag) => {
+      acc[tag] = t(`tags.${tagKeyMap[tag]}`);
+      return acc;
+    },
+    {} as Record<PromoTag, string>,
+  );
+
+  const languageOptions = locales.map((targetLocale) => {
+    const href =
+      targetLocale === defaultLocale ? "/" : `/${targetLocale}`;
+
+    return {
+      locale: targetLocale,
+      label: targetLocale.toUpperCase(),
+      href,
+    } as const;
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -310,7 +392,7 @@ export default function Home() {
     document.title = `${entry.title} | ${siteMetadata.title}`;
 
     const ensureMetaTag = (property: string, content: string) => {
-      const selector = `meta[property="${property}"]`;
+      const selector = `meta[property=\"${property}\"]`;
       let tag = document.querySelector(selector) as HTMLMetaElement | null;
 
       if (!tag) {
@@ -408,8 +490,12 @@ export default function Home() {
 
   const pageSummary =
     totalVisible === 0
-      ? "Showing 0 of 0 promos"
-      : `Showing ${pageStart + 1}-${Math.min(pageEnd, totalVisible)} of ${totalVisible} promos`;
+      ? t("pagination.none")
+      : t("pagination.summary", {
+          start: pageStart + 1,
+          end: Math.min(pageEnd, totalVisible),
+          total: totalVisible,
+        });
   const favoritesCount = favorites.size;
   const favoritesCountLabel = favoritesCount;
   const noFavoritesYet = showFavorites && favoritesCount === 0;
@@ -433,30 +519,51 @@ export default function Home() {
         <header className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 animate-rise">
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="inline-flex items-center gap-3 rounded-full border border-[var(--border-subtle)] bg-[var(--panel-strong)] px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
-              Curated AI promos
+              {t("header.badge")}
             </div>
             <div className="flex w-full flex-wrap items-center gap-3 text-xs text-[var(--muted)] sm:w-auto sm:gap-4 sm:text-sm">
               <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1">
-                {promoEntries.length} offers tracked
+                {t("header.offersTracked", { count: promoEntries.length })}
               </span>
               <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1">
-                Updated weekly
+                {t("header.updatedWeekly")}
               </span>
+              <div className="flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1">
+                {languageOptions.map((option, index) => (
+                  <span key={option.locale} className="flex items-center">
+                    <Link
+                      className={`text-xs font-semibold uppercase tracking-[0.2em] transition ${
+                        locale === option.locale
+                          ? "text-[var(--accent-strong)]"
+                          : "text-[var(--muted)] hover:text-[var(--ink)]"
+                      }`}
+                      href={option.href}
+                      aria-current={locale === option.locale ? "page" : undefined}
+                    >
+                      {option.label}
+                    </Link>
+                    {index < languageOptions.length - 1 && (
+                      <span className="mx-2 text-[var(--muted)]">|</span>
+                    )}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
               <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl lg:text-5xl">
-                ai-promo keeps every AI freebie, credit, and launch perk in one place.
+                {t("header.title")}
               </h1>
               <p className="mt-4 text-base text-[var(--muted)] sm:text-lg">
-                Discover fresh credits, trials, and bundles from top AI tooling partners.
-                Search the catalog or filter by category to plan your next build.
+                {t("header.subtitle")}
+                {" "}
+                {t("header.subtitleContinuation")}
               </p>
             </div>
             <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-6 shadow-[0_24px_60px_-40px_var(--shadow-color)]">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-sm">
-                Quick actions
+                {t("header.quickActions")}
               </div>
               <div className="mt-4 flex flex-col gap-3 text-sm text-[var(--muted)]">
                 <a
@@ -465,7 +572,7 @@ export default function Home() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Submit a promo entry
+                  {t("header.submitPromo")}
                 </a>
                 <a
                   className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-3 text-center font-medium text-[var(--ink)] transition hover:-translate-y-0.5 hover:bg-[var(--muted-bg)] hover:shadow-lg"
@@ -473,11 +580,11 @@ export default function Home() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open a promo PR
+                  {t("header.openPromoPr")}
                 </a>
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                <span>Theme</span>
+                <span>{t("header.themeLabel")}</span>
                 <div className="flex flex-wrap items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] p-1">
                   {(["system", "light", "dark"] as const).map((mode) => (
                     <button
@@ -490,7 +597,7 @@ export default function Home() {
                       type="button"
                       onClick={() => setTheme(mode)}
                     >
-                      {mode}
+                      {t(`header.theme.${mode}`)}
                     </button>
                   ))}
                 </div>
@@ -499,7 +606,9 @@ export default function Home() {
                   type="button"
                   onClick={toggleTheme}
                 >
-                  {resolvedTheme === "dark" ? "Switch to light" : "Switch to dark"}
+                  {resolvedTheme === "dark"
+                    ? t("header.switchToLight")
+                    : t("header.switchToDark")}
                 </button>
               </div>
             </div>
@@ -510,10 +619,10 @@ export default function Home() {
       <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
         <div className="grid gap-4 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel)] p-6 shadow-[0_18px_40px_-30px_var(--shadow-color)] lg:grid-cols-[1.1fr_0.65fr_0.55fr] animate-rise">
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-sm sm:tracking-[0.2em]">
-            Search promos
+            {t("filters.searchLabel")}
             <input
               className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-3 text-base font-normal text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
-              placeholder="Search by name, category, or keyword"
+              placeholder={t("filters.searchPlaceholder")}
               value={searchTerm}
               onChange={(event) => {
                 setSearchTerm(event.target.value);
@@ -522,7 +631,7 @@ export default function Home() {
             />
           </label>
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-sm sm:tracking-[0.2em]">
-            Category
+            {t("filters.category")}
             <select
               className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-3 text-base font-normal text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
               value={selectedCategory}
@@ -531,15 +640,15 @@ export default function Home() {
                 resetPagination();
               }}
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {categoryOptions.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </select>
           </label>
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-sm sm:tracking-[0.2em]">
-            Sort by
+            {t("filters.sortBy")}
             <select
               className="w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-3 text-base font-normal text-[var(--ink)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
               value={sortBy}
@@ -550,7 +659,7 @@ export default function Home() {
             >
               {sortOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  {sortOptionLabels[option]}
                 </option>
               ))}
             </select>
@@ -560,7 +669,7 @@ export default function Home() {
         <div className="mt-5 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-5 shadow-[0_12px_32px_-28px_var(--shadow-color)] animate-rise">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-sm">
-              Tag filters
+              {t("filters.tagFilters")}
             </p>
             {selectedTags.size > 0 && (
               <button
@@ -568,35 +677,35 @@ export default function Home() {
                 type="button"
                 onClick={clearTags}
               >
-                Clear tags
+                {t("filters.clearTags")}
               </button>
             )}
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            {tagFilters.map((tag) => {
-              const isAll = tag === "All";
-              const isActive = isAll ? selectedTags.size === 0 : selectedTags.has(tag);
+            {tagOptions.map((tag) => {
+              const isAll = tag.value === "All";
+              const isActive = isAll ? selectedTags.size === 0 : selectedTags.has(tag.value);
 
               return (
                 <button
-                  key={tag}
+                  key={tag.value}
                   className={`rounded-full border px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] transition ${
                     isActive
                       ? "border-[var(--accent)] bg-[var(--highlight)] text-[var(--accent-strong)]"
                       : "border-[var(--border-subtle)] bg-[var(--chip-bg)] text-[var(--muted)] hover:text-[var(--ink)]"
                   }`}
                   type="button"
-                onClick={() => {
-                  if (isAll) {
-                    clearTags();
-                    return;
-                  }
+                  onClick={() => {
+                    if (isAll) {
+                      clearTags();
+                      return;
+                    }
 
-                  toggleTag(tag);
-                  resetPagination();
-                }}
+                    toggleTag(tag.value);
+                    resetPagination();
+                  }}
                 >
-                  {tag.replace(/-/g, " ")}
+                  {tag.label}
                 </button>
               );
             })}
@@ -604,9 +713,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 flex flex-col gap-4 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:text-sm">
-          <span>
-            {pageSummary}
-          </span>
+          <span>{pageSummary}</span>
           <div className="flex flex-wrap items-center gap-4">
             <button
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 ${
@@ -621,14 +728,19 @@ export default function Home() {
               }}
             >
               <HeartIcon filled={showFavorites} />
-              <span>My favorites</span>
+              <span>{t("filters.favorites")}</span>
               <span className="rounded-full bg-[var(--muted-bg)] px-2 py-0.5 text-[0.6rem] font-semibold text-[var(--accent-strong)]">
                 {favoritesCountLabel}
               </span>
             </button>
-            {(searchTerm !== "" || selectedCategory !== "All" || sortBy !== "Newest" || showExpired || selectedTags.size > 0 || showFavorites) && (
+            {(searchTerm !== "" ||
+              selectedCategory !== "All" ||
+              sortBy !== "Newest" ||
+              showExpired ||
+              selectedTags.size > 0 ||
+              showFavorites) && (
               <button
-                aria-label="Reset all filters to default"
+                aria-label={t("filters.resetFiltersAria")}
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-4 py-2.5 font-medium text-[var(--accent-strong)] shadow-sm transition-all duration-200 hover:bg-[var(--muted-bg)] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 active:translate-y-0"
                 type="button"
                 onClick={() => {
@@ -642,7 +754,7 @@ export default function Home() {
                 }}
               >
                 <RefreshIcon />
-                <span>Reset filters</span>
+                <span>{t("filters.resetFilters")}</span>
               </button>
             )}
             {expiredEntries.length > 0 && (
@@ -656,7 +768,7 @@ export default function Home() {
                   }}
                   className="h-4 w-4 rounded border-[var(--border-subtle)] bg-[var(--highlight)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/30"
                 />
-                Show {expiredEntries.length} expired promo{expiredEntries.length !== 1 ? "s" : ""}
+                {t("filters.showExpired", { count: expiredEntries.length })}
               </label>
             )}
           </div>
@@ -666,10 +778,10 @@ export default function Home() {
           <div
             className="mt-6 flex flex-col gap-3 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-4 shadow-[0_12px_30px_-26px_var(--shadow-color)] sm:flex-row sm:items-center sm:justify-between"
             role="navigation"
-            aria-label="Promo pagination"
+            aria-label={t("pagination.aria")}
           >
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-sm">
-              Page {safePage} of {totalPages}
+              {t("pagination.page", { current: safePage, total: totalPages })}
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -677,18 +789,18 @@ export default function Home() {
                 type="button"
                 onClick={handlePreviousPage}
                 disabled={safePage === 1}
-                aria-label="Go to previous page"
+                aria-label={t("pagination.previousAria")}
               >
-                Prev
+                {t("pagination.prev")}
               </button>
               <button
                 className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:-translate-y-0.5 hover:bg-[var(--muted-bg)] disabled:cursor-not-allowed disabled:opacity-60"
                 type="button"
                 onClick={handleNextPage}
                 disabled={safePage === totalPages}
-                aria-label="Go to next page"
+                aria-label={t("pagination.nextAria")}
               >
-                Next
+                {t("pagination.next")}
               </button>
             </div>
           </div>
@@ -697,12 +809,10 @@ export default function Home() {
         {activeEntries.length === 0 && expiredEntries.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-[var(--border-subtle)] bg-[var(--panel-strong)] p-8 text-center text-[var(--muted)] sm:p-10">
             <p className="text-base font-semibold text-[var(--ink)] sm:text-lg">
-              {noFavoritesYet ? "No favorites yet." : "No promos match your search."}
+              {noFavoritesYet ? t("empty.noFavorites") : t("empty.noMatch")}
             </p>
             <p className="mt-2">
-              {noFavoritesYet
-                ? "Tap the heart on a promo to save it here."
-                : "Try a different keyword or reset the category filter."}
+              {noFavoritesYet ? t("empty.noFavoritesHint") : t("empty.noMatchHint")}
             </p>
           </div>
         ) : (
@@ -710,7 +820,7 @@ export default function Home() {
             {pagedActiveEntries.length > 0 && (
               <div className="mt-6">
                 <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)]">
-                  Active Promos ({activeEntries.length})
+                  {t("sections.active", { count: activeEntries.length })}
                 </h2>
                 <div className="grid gap-6 md:grid-cols-2">
                   {pagedActiveEntries.map((entry) => {
@@ -732,7 +842,7 @@ export default function Home() {
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.3em]">
-                              {entry.category}
+                              {categoryLabels[entry.category]}
                             </p>
                             <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
                               {entry.title}
@@ -740,11 +850,11 @@ export default function Home() {
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             <span className="rounded-full bg-[var(--muted-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
-                              Active
+                              {t("badges.active")}
                             </span>
                             {verifiedLabel && (
                               <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
-                                Verified {verifiedLabel}
+                                {t("badges.verified", { date: verifiedLabel })}
                               </span>
                             )}
                             <div className="flex flex-wrap items-center gap-2">
@@ -759,8 +869,8 @@ export default function Home() {
                                 aria-pressed={favorites.has(entry.id)}
                                 aria-label={
                                   favorites.has(entry.id)
-                                    ? `Remove ${entry.title} from favorites`
-                                    : `Save ${entry.title} to favorites`
+                                    ? t("favorites.remove", { title: entry.title })
+                                    : t("favorites.add", { title: entry.title })
                                 }
                               >
                                 <HeartIcon filled={favorites.has(entry.id)} />
@@ -774,37 +884,39 @@ export default function Home() {
                                 type="button"
                                 onClick={() => handleCopyLink(entry)}
                               >
-                                {isCopied ? "Copied!" : "Copy link"}
+                                {isCopied ? t("badges.copied") : t("badges.copyLink")}
                               </button>
                             </div>
                           </div>
                         </div>
-                      <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                        {entry.description}
-                      </p>
+                        <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                          {entry.description}
+                        </p>
                         <div className="mt-4 flex flex-wrap gap-2">
                           {entry.tags.map((tag) => (
                             <span
                               key={`${entry.id}-${tag}`}
                               className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
                             >
-                              {tag.replace(/-/g, " ")}
+                              {tagLabels[tag]}
                             </span>
                           ))}
                           {entry.submittedBy && (
                             <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-                              Submitted by {entry.submittedBy}
+                              {t("cards.submittedBy", { name: entry.submittedBy })}
                             </span>
                           )}
                         </div>
                         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.2em]">
-                              {entry.expiryDate === "Ongoing" ? "Availability" : "Expires"}
+                              {entry.expiryDate === "Ongoing"
+                                ? t("cards.availability")
+                                : t("cards.expires")}
                             </p>
                             <p className="text-sm font-medium text-[var(--ink)]">
                               {entry.expiryDate === "Ongoing"
-                                ? "Ongoing"
+                                ? t("cards.ongoing")
                                 : formatter.format(new Date(entry.expiryDate))}
                             </p>
                             {entry.sourceUrl && (
@@ -815,7 +927,7 @@ export default function Home() {
                                   target="_blank"
                                   rel="noreferrer"
                                 >
-                                  Source
+                                  {t("cards.source")}
                                 </a>
                               </p>
                             )}
@@ -826,7 +938,7 @@ export default function Home() {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            Visit offer
+                            {t("cards.visitOffer")}
                             <span aria-hidden>→</span>
                           </a>
                         </div>
@@ -840,7 +952,7 @@ export default function Home() {
             {showExpired && pagedExpiredEntries.length > 0 && (
               <div className="mt-10">
                 <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                  Expired Promos ({expiredEntries.length})
+                  {t("sections.expired", { count: expiredEntries.length })}
                 </h2>
                 <div className="grid gap-6 md:grid-cols-2">
                   {pagedExpiredEntries.map((entry) => {
@@ -862,7 +974,7 @@ export default function Home() {
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-xs sm:tracking-[0.3em]">
-                              {entry.category}
+                              {categoryLabels[entry.category]}
                             </p>
                             <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ink)] sm:text-2xl">
                               {entry.title}
@@ -870,11 +982,11 @@ export default function Home() {
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             <span className="rounded-full bg-[var(--surface-strong)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted-text)] sm:text-xs sm:tracking-[0.15em]">
-                              Expired
+                              {t("badges.expired")}
                             </span>
                             {verifiedLabel && (
                               <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--highlight)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[var(--accent-strong)] sm:text-xs sm:tracking-[0.15em]">
-                                Verified {verifiedLabel}
+                                {t("badges.verified", { date: verifiedLabel })}
                               </span>
                             )}
                             <div className="flex flex-wrap items-center gap-2">
@@ -889,8 +1001,8 @@ export default function Home() {
                                 aria-pressed={favorites.has(entry.id)}
                                 aria-label={
                                   favorites.has(entry.id)
-                                    ? `Remove ${entry.title} from favorites`
-                                    : `Save ${entry.title} to favorites`
+                                    ? t("favorites.remove", { title: entry.title })
+                                    : t("favorites.add", { title: entry.title })
                                 }
                               >
                                 <HeartIcon filled={favorites.has(entry.id)} />
@@ -904,33 +1016,33 @@ export default function Home() {
                                 type="button"
                                 onClick={() => handleCopyLink(entry)}
                               >
-                                {isCopied ? "Copied!" : "Copy link"}
+                                {isCopied ? t("badges.copied") : t("badges.copyLink")}
                               </button>
                             </div>
                           </div>
                         </div>
-                      <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                        {entry.description}
-                      </p>
+                        <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                          {entry.description}
+                        </p>
                         <div className="mt-4 flex flex-wrap gap-2">
                           {entry.tags.map((tag) => (
                             <span
                               key={`${entry.id}-${tag}`}
                               className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]"
                             >
-                              {tag.replace(/-/g, " ")}
+                              {tagLabels[tag]}
                             </span>
                           ))}
                           {entry.submittedBy && (
                             <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--chip-bg)] px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-                              Submitted by {entry.submittedBy}
+                              {t("cards.submittedBy", { name: entry.submittedBy })}
                             </span>
                           )}
                         </div>
                         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:text-xs sm:tracking-[0.2em]">
-                              Expired
+                              {t("badges.expired")}
                             </p>
                             <p className="text-sm font-medium text-[var(--ink)]">
                               {formatter.format(new Date(entry.expiryDate))}
@@ -943,7 +1055,7 @@ export default function Home() {
                                   target="_blank"
                                   rel="noreferrer"
                                 >
-                                  Source
+                                  {t("cards.source")}
                                 </a>
                               </p>
                             )}
@@ -954,7 +1066,7 @@ export default function Home() {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            View offer
+                            {t("cards.viewOffer")}
                             <span aria-hidden>→</span>
                           </a>
                         </div>

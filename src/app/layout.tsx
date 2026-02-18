@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "./theme-provider";
+import { defaultLocale } from "@/i18n/config";
 import { siteMetadata } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
@@ -65,9 +65,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang={defaultLocale}>
       <body className={`${spaceGrotesk.variable} ${manrope.variable} antialiased`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        {children}
       </body>
     </html>
   );

@@ -1,0 +1,102 @@
+{
+  "header": {
+    "badge": "Promo AI Terkurasi",
+    "offersTracked": "{count} promo terlacak",
+    "updatedWeekly": "Diperbarui mingguan",
+    "title": "ai-promo menyimpan setiap gratisan AI, kredit, dan bonus peluncuran di satu tempat.",
+    "subtitle": "Temukan kredit, uji coba, dan paket terbaru dari mitra alat AI terbaik.",
+    "subtitleContinuation": "Cari katalog atau saring per kategori untuk merencanakan proyek berikutnya.",
+    "quickActions": "Aksi cepat",
+    "submitPromo": "Ajukan promo baru",
+    "openPromoPr": "Buka PR promo",
+    "themeLabel": "Tema",
+    "theme": {
+      "system": "sistem",
+      "light": "terang",
+      "dark": "gelap"
+    },
+    "switchToLight": "Ganti ke terang",
+    "switchToDark": "Ganti ke gelap"
+  },
+  "filters": {
+    "searchLabel": "Cari promo",
+    "searchPlaceholder": "Cari berdasarkan nama, kategori, atau kata kunci",
+    "category": "Kategori",
+    "sortBy": "Urutkan",
+    "tagFilters": "Filter tag",
+    "clearTags": "Hapus tag",
+    "favorites": "Favorit saya",
+    "resetFilters": "Reset filter",
+    "resetFiltersAria": "Reset semua filter ke default",
+    "showExpired": "Tampilkan {count} promo kedaluwarsa",
+    "all": "Semua"
+  },
+  "sort": {
+    "expiringSoon": "Segera berakhir",
+    "newest": "Terbaru",
+    "alphabetical": "Alfabetis",
+    "category": "Kategori"
+  },
+  "categories": {
+    "models": "Model",
+    "design": "Desain",
+    "hosting": "Hosting",
+    "productivity": "Produktivitas",
+    "developerTools": "Alat Pengembang",
+    "analytics": "Analitik",
+    "education": "Pendidikan",
+    "infrastructure": "Infrastruktur",
+    "data": "Data",
+    "security": "Keamanan",
+    "openSource": "Sumber Terbuka",
+    "startupPrograms": "Program Startup"
+  },
+  "tags": {
+    "freeTier": "Gratis",
+    "credits": "Kredit",
+    "trial": "Uji coba",
+    "startupOnly": "Khusus startup",
+    "student": "Pelajar",
+    "openSource": "Sumber terbuka"
+  },
+  "pagination": {
+    "none": "Menampilkan 0 dari 0 promo",
+    "summary": "Menampilkan {start}-{end} dari {total} promo",
+    "page": "Halaman {current} dari {total}",
+    "prev": "Sebelumnya",
+    "next": "Berikutnya",
+    "previousAria": "Ke halaman sebelumnya",
+    "nextAria": "Ke halaman berikutnya",
+    "aria": "Navigasi promo"
+  },
+  "empty": {
+    "noFavorites": "Belum ada favorit.",
+    "noMatch": "Tidak ada promo yang cocok dengan pencarian Anda.",
+    "noFavoritesHint": "Ketuk ikon hati pada promo untuk menyimpannya di sini.",
+    "noMatchHint": "Coba kata kunci lain atau reset filter kategori."
+  },
+  "sections": {
+    "active": "Promo Aktif ({count})",
+    "expired": "Promo Kedaluwarsa ({count})"
+  },
+  "badges": {
+    "active": "Aktif",
+    "expired": "Kedaluwarsa",
+    "verified": "Terverifikasi {date}",
+    "copied": "Tersalin!",
+    "copyLink": "Salin tautan"
+  },
+  "favorites": {
+    "remove": "Hapus {title} dari favorit",
+    "add": "Simpan {title} ke favorit"
+  },
+  "cards": {
+    "submittedBy": "Dikirim oleh {name}",
+    "availability": "Ketersediaan",
+    "expires": "Berakhir",
+    "ongoing": "Berlangsung",
+    "source": "Sumber",
+    "visitOffer": "Kunjungi penawaran",
+    "viewOffer": "Lihat penawaran"
+  }
+}
