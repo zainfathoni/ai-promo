@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate": "npx tsx src/scripts/validate-promos.mts",
-    "check-expired-promos": "npx tsx src/scripts/check-expired-promos.mts"
+    "check-expired-promos": "npx tsx src/scripts/check-expired-promos.mts",
+    "curate-promos": "npx tsx src/scripts/curate-promos.mts"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.18",
