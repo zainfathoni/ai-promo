@@ -1,28 +1,62 @@
 #!/usr/bin/env node
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const REPO_OWNER = "zainfathoni";
-const REPO_NAME = "ai-promo";
+import { promoCategoryOptions, type PromoCategory } from "../data/promos";
+
 const PROMOS_FILE = join(process.cwd(), "src/data/promos.ts");
 
-function gh(command: string): string {
+function runCommand(command: string, args: string[]): string {
   try {
-    return execSync(command, {
+    return execFileSync(command, args, {
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
     }).trim();
   } catch (error: unknown) {
-    const err = error as { stderr?: string };
-    throw new Error(err.stderr || String(error));
+    const err = error as { stderr?: Buffer | string };
+    const stderr = err.stderr
+      ? typeof err.stderr === "string"
+        ? err.stderr
+        : err.stderr.toString("utf-8")
+      : "";
+    throw new Error(stderr || String(error));
   }
 }
 
+const gh = (args: string[]) => runCommand("gh", args);
+const git = (args: string[]) => runCommand("git", args);
+
+function getRepoInfo(): { owner: string; name: string } {
+  const envRepo = process.env.GITHUB_REPOSITORY;
+  if (envRepo) {
+    const [owner, name] = envRepo.split("/");
+    if (owner && name) {
+      return { owner, name };
+    }
+  }
+
+  const repo = gh([
+    "repo",
+    "view",
+    "--json",
+    "owner,name",
+    "--jq",
+    ".owner.login + '/' + .name",
+  ]);
+  const [owner, name] = repo.split("/");
+  if (!owner || !name) {
+    throw new Error("Unable to determine repository owner/name.");
+  }
+  return { owner, name };
+}
+
+const { owner: REPO_OWNER, name: REPO_NAME } = getRepoInfo();
+
 function getSubmissionIssues(): Array<{ number: number; body: string; title: string; user: string }> {
   const query = `repo:${REPO_OWNER}/${REPO_NAME} is:issue is:open label:promo label:submission`;
-  const output = gh(`gh search issues --limit 100 --json number,body,title,author '${query}'`);
+  const output = gh(["search", "issues", "--limit", "100", "--json", "number,body,title,author", query]);
   const issues = JSON.parse(output);
   return issues.map((issue: { number: number; body: string; title: string; author: { login: string } }) => ({
     number: issue.number,
@@ -41,32 +75,27 @@ function parseIssueBody(body: string): {
   status: string;
   notes: string;
 } | null {
-  const patterns = {
-    title: /<!-- prop:title -->([\s\S]*?)<!-- \/prop:title -->/i,
-    description: /<!-- prop:description -->([\s\S]*?)<!-- \/prop:description -->/i,
-    category: /<!-- prop:category -->([\s\S]*?)<!-- \/prop:category -->/i,
-    url: /<!-- prop:url -->([\s\S]*?)<!-- \/prop:url -->/i,
-    expiry: /<!-- prop:expiry -->([\s\S]*?)<!-- \/prop:expiry -->/i,
-    status: /<!-- prop:status -->([\s\S]*?)<!-- \/prop:status -->/i,
-    notes: /<!-- prop:notes -->([\s\S]*?)<!-- \/prop:notes -->/i,
-  };
-
-  const extract = (key: keyof typeof patterns) => {
-    const match = body.match(patterns[key]);
+  const escapeHeading = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const extract = (heading: string) => {
+    const pattern = new RegExp(
+      `(?:^|\\n)###\\s+${escapeHeading(heading)}\\s*\\n([\\s\\S]*?)(?=\\n###\\s+|$)`,
+      "i",
+    );
+    const match = body.match(pattern);
     return match ? match[1].trim() : "";
   };
 
-  const title = extract("title");
+  const title = extract("Promo title");
   if (!title) return null;
 
   return {
     title,
-    description: extract("description"),
-    category: extract("category"),
-    url: extract("url"),
-    expiry: extract("expiry"),
-    status: extract("status"),
-    notes: extract("notes"),
+    description: extract("Description"),
+    category: extract("Category"),
+    url: extract("URL"),
+    expiry: extract("Expiry date"),
+    status: extract("Status"),
+    notes: extract("Additional notes"),
   };
 }
 
@@ -147,22 +176,26 @@ function getPromoEntry(
 ): string {
   const id = generateId(data.title);
   const today = new Date().toISOString().split("T")[0];
-  const category = data.category || "Developer Tools";
-  const expiryDate = data.status === "Active" || !data.expiry ? "Ongoing" : data.expiry;
+  const normalizedCategory = promoCategoryOptions.find(
+    (option) => option.toLowerCase() === data.category.trim().toLowerCase(),
+  );
+  const category: PromoCategory = normalizedCategory ?? "Developer Tools";
+  const expiryDate = data.expiry ? data.expiry : "Ongoing";
+  const stringify = (value: string) => JSON.stringify(value);
 
   return `  {
-    id: "${id}",
-    title: "${data.title}",
-    description: "${data.description.replace(/"/g, '\\"')}",
-    category: "${category}",
+    id: ${stringify(id)},
+    title: ${stringify(data.title)},
+    description: ${stringify(data.description)},
+    category: ${stringify(category)},
     tags: [],
-    url: "${data.url}",
-    expiryDate: "${expiryDate}",
-    addedDate: "${today}",
+    url: ${stringify(data.url)},
+    expiryDate: ${stringify(expiryDate)},
+    addedDate: ${stringify(today)},
     source: "Community submission",
     sourceUrl: "https://github.com/${REPO_OWNER}/${REPO_NAME}/issues",
-    submittedBy: "${user}",
-  }`;
+    submittedBy: ${stringify(user)},
+  },`;
 }
 
 async function createPrForIssue(
@@ -176,21 +209,22 @@ async function createPrForIssue(
     return;
   }
 
-  if (!parsed) {
-    console.log(`Issue #${issueNumber}: Could not parse body, skipping`);
-    return;
-  }
-
   if (checkDuplicateUrl(parsed.url)) {
     console.log(`Issue #${issueNumber}: Duplicate URL detected, skipping`);
-    gh(`gh issue comment ${issueNumber} --body "This submission has a duplicate URL and was skipped."`);
+    gh(["issue", "comment", String(issueNumber), "--body", "This submission has a duplicate URL and was skipped."]);
     return;
   }
 
   const similarTitle = checkFuzzyTitleMatch(parsed.title);
   if (similarTitle) {
     console.log(`Issue #${issueNumber}: Similar title detected: "${similarTitle}", skipping`);
-    gh(`gh issue comment ${issueNumber} --body "This submission has a similar title to an existing promo and was skipped."`);
+    gh([
+      "issue",
+      "comment",
+      String(issueNumber),
+      "--body",
+      "This submission has a similar title to an existing promo and was skipped.",
+    ]);
     return;
   }
 
@@ -200,8 +234,10 @@ async function createPrForIssue(
   console.log(`Issue #${issueNumber}: Creating PR for "${parsed.title}"`);
 
   // Reset to main before creating new branch to avoid stacking changes
-  gh(`git checkout main`);
-  gh(`git checkout -b ${branchName} 2>/dev/null || git checkout ${branchName}`);
+  git(["checkout", "main"]);
+  git(["fetch", "origin", "main"]);
+  git(["reset", "--hard", "origin/main"]);
+  git(["checkout", "-B", branchName]);
 
   const promosContent = readFileSync(PROMOS_FILE, "utf-8");
   const insertPosition = promosContent.indexOf("export const promoEntries: PromoEntry[] = [");
@@ -211,21 +247,21 @@ async function createPrForIssue(
 
   const closingBracePosition = promosContent.indexOf("];", insertPosition);
   const newContent =
-    promosContent.slice(0, closingBracePosition) +
-    ",\n" +
+    promosContent.slice(0, closingBracePosition).trimEnd() +
+    "\n" +
     promoEntry +
     "\n" +
     promosContent.slice(closingBracePosition);
 
   writeFileSync(PROMOS_FILE, newContent);
 
-  gh(`git add ${PROMOS_FILE}`);
-  gh(`git commit -m "feat: add promo - ${parsed.title.replace(/"/g, '\\"')}"`);
+  git(["add", PROMOS_FILE]);
+  git(["commit", "-m", `feat: add promo - ${parsed.title}`]);
 
   try {
-    gh(`git push -u origin ${branchName} --force`);
+    git(["push", "-u", "origin", branchName, "--force"]);
   } catch {
-    gh(`git push origin ${branchName} --force`);
+    git(["push", "origin", branchName, "--force"]);
   }
 
   const prBody = `## Summary
@@ -235,13 +271,32 @@ async function createPrForIssue(
 
 This PR was auto-generated by the promo curation workflow.`;
 
-  const prOutput = gh(
-    `gh pr create --title "feat: add promo - ${parsed.title}" --body "${prBody.replace(/"/g, '\\"')}" --label "promo-curation"`,
-  );
+  const prOutput = gh([
+    "pr",
+    "create",
+    "--title",
+    `feat: add promo - ${parsed.title}`,
+    "--body",
+    prBody,
+    "--label",
+    "promo-curation",
+  ]);
   const prUrl = prOutput;
 
-  gh(`gh issue comment ${issueNumber} --body "Your promo has been submitted! PR created: ${prUrl}"`);
-  gh(`gh issue close ${issueNumber} --comment "Promo submitted via PR: ${prUrl}"`);
+  gh([
+    "issue",
+    "comment",
+    String(issueNumber),
+    "--body",
+    `Your promo has been submitted! PR created: ${prUrl}`,
+  ]);
+  gh([
+    "issue",
+    "close",
+    String(issueNumber),
+    "--comment",
+    `Promo submitted via PR: ${prUrl}`,
+  ]);
 
   console.log(`Issue #${issueNumber}: Done! PR: ${prUrl}`);
 }
