@@ -199,6 +199,8 @@ async function createPrForIssue(
 
   console.log(`Issue #${issueNumber}: Creating PR for "${parsed.title}"`);
 
+  // Reset to main before creating new branch to avoid stacking changes
+  gh(`git checkout main`);
   gh(`git checkout -b ${branchName} 2>/dev/null || git checkout ${branchName}`);
 
   const promosContent = readFileSync(PROMOS_FILE, "utf-8");
