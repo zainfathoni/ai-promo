@@ -55,8 +55,15 @@ function getRepoInfo(): { owner: string; name: string } {
 const { owner: REPO_OWNER, name: REPO_NAME } = getRepoInfo();
 
 function getSubmissionIssues(): Array<{ number: number; body: string; title: string; user: string }> {
-  const query = `repo:${REPO_OWNER}/${REPO_NAME} is:issue is:open label:promo label:submission`;
-  const output = gh(["search", "issues", "--limit", "100", "--json", "number,body,title,author", query]);
+  const output = gh([
+    "search", "issues",
+    "--repo", `${REPO_OWNER}/${REPO_NAME}`,
+    "--label", "promo",
+    "--label", "submission",
+    "--state", "open",
+    "--limit", "100",
+    "--json", "number,body,title,author",
+  ]);
   const issues = JSON.parse(output);
   return issues.map((issue: { number: number; body: string; title: string; author: { login: string } }) => ({
     number: issue.number,
